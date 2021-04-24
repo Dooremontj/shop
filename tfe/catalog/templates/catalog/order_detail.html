@@ -1,0 +1,22 @@
+{% extends "index.html" %}
+{% load static %}
+{% block title %}Détail de la commande{% endblock %}
+
+{% block content %}
+<br>
+  <h1>Nom de la commande: {{ order.title }}</h1>
+
+  <p><strong>date :</strong>{{ order.date }}</p> <!-- author detail link not yet defined -->
+  <div style="margin-left:20px;margin-top:20px">
+    <h4>Ligne commande</h4>
+
+    {% for orderitem in order.orderitem_set.all %}
+      <hr>
+      <p> produit : {{ orderitem.product }} </p>
+      <p><strong>qty :</strong> {{ orderitem.qty }}</p>
+
+   {% endfor %}
+  </div>
+
+
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block title %}{% endblock %}
+{% block content %}
+    <h2>Profile</h2>
+    <hr>
+    <div class="col-md-4">
+        <form action="" method="post">{% csrf_token %}
+            {{ form.as_p }}
+
+            <table class="table">
+                {{ orderlist.management_form }}
+
+                {% for form in orderlist.forms %}
+                    {% if forloop.first %}
+                        <thead>
+                        <tr>
+                            {% for field in form.visible_fields %}
+                                <th>{{ field.label|capfirst }}</th>
+                            {% endfor %}
+                        </tr>
+                        </thead>
+                    {% endif %}
+                    <tr class="{% cycle row1 row2 %} formset_row">
+                        {% for field in form.visible_fields %}
+                            <td>
+                                {# Include the hidden fields in the form #}
+                                {% if forloop.first %}
+                                    {% for hidden in form.hidden_fields %}
+                                        {{ hidden }}
+                                    {% endfor %}
+                                {% endif %}
+                                {{ field.errors.as_ul }}
+                                {{ field }}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+            <input type="submit" value="Save"/> <a href="{% url 'orders' %}">back to the list</a>
+        </form>
+    </div>
+
+{{ orderlist.media }}
+
+<script>
+
+(function($) {
+    $('#add-form').click(function() {
+        var index = $('#id_inline_test_models-TOTAL_FORMS').val()
+        var newTable = $('#id_inline_test_models-__prefix__-DELETE').parents('table').clone()
+        newTable.find(':input').each(function() {
+            for (attr of ['name', 'id'])
+                $(this).attr(
+                    attr,
+                    $(this).attr(attr).replace('__prefix__', index)
+                )
+        })
+        newTable.insertBefore($(this))
+        $('#id_inline_test_models-TOTAL_FORMS').val(
+            parseInt($('#id_inline_test_models-TOTAL_FORMS').val()) + 1
+        )
+        newTable.slideDown()
+    })
+})($)
+
+
+</script>
+
+{% endblock %}

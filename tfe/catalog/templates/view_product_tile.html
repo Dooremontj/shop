@@ -1,0 +1,74 @@
+{% extends "product/base.html" %}
+{% load staticfiles %}
+{% block title %}Produits{% endblock %}
+
+{% block link %}
+
+{% endblock %}
+				{% block scripts %}
+
+<script>
+
+$(function(){ // this will be called when the DOM is ready
+  $('#search').keyup(function() {
+    console.log('11');
+	$('.card').removeClass('d-none');
+    var filter = $(this).val(); // get the value of the input, which we filter on
+    $('.card-group').find('.card .card-body h6:not(:contains("'+filter+'"))').parent().parent().addClass('d-none');
+  });
+});
+
+</script>
+	{% endblock %}
+{% block content %}
+
+
+<h1>Product List</h1>
+
+
+  {% if products %}
+<a href="{% url "Prod_List" %}">
+	<img class="img-fluid img-thumbnail change-layout" src="{% static 'img/btn/view_list-24px.svg' %} " alt="List_view"/>
+</a>
+<a href="{% url "Prod_Tile" %}">
+	<img class="img-fluid img-thumbnail change-layout" src="{% static 'img/btn/grid_view-24px.svg' %} " alt="Grid_view"/>
+</a>
+
+<nav class="navbar navbar-light justify-content-center mt-4">
+	<div class="col-sm-12 col-md-6">
+		<div id="sortTable_filter" class="dataTables_filter">
+					<form class="form-inline">
+			<input class="form-control form-control-lg mr-sm-2" type="search" placeholder="Type a name" aria-label="Search" id="search">
+			</form>
+			</div>
+		</div>
+
+		</nav>
+
+		<div class="row center-div">
+			<div class="card-group">
+  {% for product in products %}
+				<div class="card">
+					<a href="{{ product.get_absolute_url }}" class="card-img-top">
+		{% if product.Product_Img %}
+						<img class="card-img-top" src="{{ product.Product_Img.url }} " alt="{{ product.Product_Name }}"/>
+		{% else %}
+						<img class="card-img-top" src="{% static 'img/default_product.png' %} " alt="{{ product.Product_Name }}"/>
+		{% endif %}
+					</a>
+					<div class="card-body">
+						<h6 class="card-title">{{ product.Product_Name|truncatewords:5 }}</h5>
+						<p class="card-text">Qt en stock : {{ product.Product_Qt_Stock }}</p>
+						<p class="card-text">Qt min : {{ product.Product_Qt_Min }}</p>
+					</div>
+					<div class="card-footer">
+						<small class="text-muted">Last updated : {{ product.Product_Date_Modif }}</small>
+					</div>
+				</div>
+   {% endfor %}
+			</div>
+		</div>
+  {% else %}
+		<p>There are no products in the shop.</p>
+  {% endif %} 
+{% endblock %}

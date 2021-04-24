@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+    {% load static %}  
+		<title>{% block title %}Shop Fedasil{% endblock %}</title>
+		{% load bootstrap4 %}
+		{# Load CSS and JavaScript #}
+		{% bootstrap_css %}
+		{% bootstrap_javascript jquery='full' %}
+		{% block link %} 
+		{% endblock %}
+		{% block scripts %}
+		{% endblock %}
+
+	</head>
+	<body>
+		<header>Shop AMC</header>
+		       {% block nav %}
+		<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+			<div class="collapse navbar-collapse" id="navbarCollapse">
+
+				<ul class="navbar-nav mr-auto">
+				
+					<li class="nav-item">
+						<a class="nav-link active" aria-current="page" href="{% url 'index' %}">Accueil</a>
+					</li>
+					<li>
+						<a class="nav-link" href="{% url 'products' %}">Liste produits</a>
+					</li>
+					<li>
+						<a class="nav-link" href="{% url 'suppliers' %}">Liste fournisseurs</a>
+					</li>
+					<li>
+						<a class="nav-link" href="{% url 'orders' %}">Liste commande</a>
+					</li>
+				{% if user.is_authenticated %}
+					<li><a href="{% url 'logout'%}">Logout</a></li>
+				{% else %}
+					<li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>
+				{% endif %} 
+				</ul>
+			</li>
+
+		</ul>
+      
+	</div>
+</nav>
+ {% endblock %}
+<main role="main" class="container">
+	<section id="content"><br><br>
+	{% block pagination %}
+    {% if is_paginated %}
+        <div class="pagination">
+            <span class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
+                <span class="page-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+  {% endblock %}
+       {% block content %}
+	   {% endblock %}
+ 	<section id="content"><br><br>
+	{% block pagination_bottom %}
+    {% if is_paginated %}
+        <div class="pagination">
+            <span class="page-links">
+                {% if page_obj.has_previous %}
+                    <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
+                {% endif %}
+                <span class="page-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                {% if page_obj.has_next %}
+                    <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
+                {% endif %}
+            </span>
+        </div>
+    {% endif %}
+  {% endblock %}
+	</section>
+</main>
+<footer>&copy; Fedasil</footer>
+</body>
+</html>

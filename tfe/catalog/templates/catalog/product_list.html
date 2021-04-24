@@ -1,0 +1,48 @@
+{% extends "index.html" %}
+{% load static %} 
+
+{% block content %}
+<br>
+	<h1>Liste des produits</h1>
+
+	<a href="{% url 'product-create' %} ">Ajouter un nouveau produit</a>
+  {% if product_list %}
+  	<table class="datatable table table-striped" id="example" >
+		<thead>
+			<tr>
+				<th scope="col">Image</th>
+				<th scope="col">Produit</th>
+				<th scope="col">Stock</th>
+				<th scope="col">Fournisseur</th>
+				<th scope="col">Editer</th>
+				<th scope="col">Supprimer</th>
+			</tr>
+		</thead>
+		<tbody id="myTable">
+  {% for product in product_list %}
+			<tr >
+				<th scope="row w-25" {% if product.prod_stock <= product.prod_min %} bgcolor="crimson important!" {% endif %}><img width="100" height="100" src="{{ product.prod_img.url }} " alt="{{ product.prod_name }}" class="img-fluid img-thumbnail"></th>
+				<td scope="row" {% if product.prod_stock <= product.prod_min %} bgcolor="crimson important!" {% endif %}><a href="{{ product.get_absolute_url }}">{{ product.prod_name }}</a></td>
+				<td {% if product.prod_stock <= product.prod_min %} bgcolor="crimson important!" {% endif %}>{{product.prod_stock}}</td>
+				<td {% if product.prod_stock <= product.prod_min %} bgcolor="crimson important!" {% endif %}><a href="{% url 'supplier-detail' product.prod_supplier.pk %}">{{ product.prod_supplier }}</a></td>
+				<td {% if product.prod_stock <= product.prod_min %} bgcolor="crimson important!" {% endif %}><a href="{% url 'product-update' product.id %} ">Editer :{{ product.prod_name }}</a></td>
+				<td {% if product.prod_stock <= product.prod_min %} bgcolor="crimson important!" {% endif %}><a href="{% url 'product-delete' product.id %}"> Supprimer</a></td>
+			</tr>
+  {% endfor %}
+  		</tbody>
+	</table>
+  {% else %}
+	<p>There are no products in the shop.</p>
+  {% endif %} 
+	
+		<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+		<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+		<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#example').DataTable();
+} );
+</script>
+{% endblock %}
+

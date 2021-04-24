@@ -1,0 +1,15 @@
+{% extends "index.html" %}
+{% load static %}
+{% block title %}Détail fournisseur{% endblock %}
+
+{% block content %}
+<br>
+  <h1>Nom du fournisseur: {{ supplier.supplier_name }}</h1>
+
+  <p><strong>Adresse :</strong>{{ supplier.supplier_address }}</p> <!-- author detail link not yet defined -->
+  <p><strong>E-mail :</strong> {{ supplier.supplier_mail }}</p>
+  <p><strong>Téléphone :</strong> {{ supplier.supplier_tel }}</p>
+
+
+
+{% endblock %}

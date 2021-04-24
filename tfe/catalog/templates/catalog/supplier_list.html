@@ -1,0 +1,44 @@
+{% extends "index.html" %}
+{% load static %} 
+
+{% block content %}
+<br>
+	<h1>Liste des fournisseurs</h1>
+  {% if supplier_list %}
+  	<table class="datatable table table-striped" id="SuppliersTable" >
+		<thead>
+			<tr>
+				<th scope="col">Nom</th>
+				<th scope="col">Addresse</th>
+				<th scope="col">Mail</th>
+				<th scope="col">Téléphone</th>
+				<th scope="col">Editer</th>
+				<th scope="col">Supprimer</th>
+			</tr>
+		</thead>
+		<tbody id="myTable">
+  {% for supplier in supplier_list %}
+			<tr >
+				<th><a href="{{ supplier.get_absolute_url }}">{{ supplier.supplier_name }}</a></th>
+				<td>{{ supplier.supplier_address }}</td>
+				<td>{{ supplier.supplier_mail }}</td>
+				<td>{{ supplier.supplier_tel }}</td>
+			</tr>
+  {% endfor %}
+  		</tbody>
+	</table>
+  {% else %}
+	<p>There are no products in the shop.</p>
+  {% endif %} 
+	
+		<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+		<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+		<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#SuppliersTable').DataTable();
+} );
+</script>
+{% endblock %}
+

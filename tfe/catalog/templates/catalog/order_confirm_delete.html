@@ -1,0 +1,14 @@
+{% extends "index.html" %}
+
+{% block content %}
+
+<h1>Delete Order</h1>
+
+<p>Are you sure you want to delete the order: {{ order }}?</p>
+
+<form action="" method="POST">
+  {% csrf_token %}
+  <input type="submit" value="Yes, delete.">
+</form>
+
+{% endblock %}
