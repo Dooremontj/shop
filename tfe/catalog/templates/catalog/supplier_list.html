@@ -1,28 +1,31 @@
 {% extends "index.html" %}
 {% load static %} 
-
+{% block title %}Liste des fournisseurs {% endblock %}
 {% block content %}
-<br>
-	<h1>Liste des fournisseurs</h1>
+
+<a class="btn btn-dark" href="{% url 'supplier-create' %} ">+ Ajouter un fournisseur</a>
   {% if supplier_list %}
+
   	<table class="datatable table table-striped" id="SuppliersTable" >
 		<thead>
 			<tr>
 				<th scope="col">Nom</th>
-				<th scope="col">Addresse</th>
+				<th scope="col">Adresse</th>
 				<th scope="col">Mail</th>
 				<th scope="col">Téléphone</th>
-				<th scope="col">Editer</th>
+				<th scope="col">Produits</th>
 				<th scope="col">Supprimer</th>
 			</tr>
 		</thead>
 		<tbody id="myTable">
   {% for supplier in supplier_list %}
 			<tr >
-				<th><a href="{{ supplier.get_absolute_url }}">{{ supplier.supplier_name }}</a></th>
+				<td><a href=# onclick="getSupplierDetail({{ supplier.id }})">{{ supplier.supplier_name }}</a></td>
 				<td>{{ supplier.supplier_address }}</td>
-				<td>{{ supplier.supplier_mail }}</td>
+				<td><a href="mailto:{{ supplier.supplier_mail }}">{{ supplier.supplier_mail }}</a></td>
 				<td>{{ supplier.supplier_tel }}</td>
+				<td><a href=# onclick="getProductList({{ supplier.pk }})" class="fa fa-pencil"  ><img src="/static/media/icon/list.png " alt="{{ supplier.supplier_name }}"></a></td>
+				<td ><a href=# onclick="getConfirmDeleteModal({{ supplier.pk }})" class="fa fa-pencil" ><img src="/static/media/icon/delete.png " alt="{{ supplier.pk }}"></a></td>
 			</tr>
   {% endfor %}
   		</tbody>
@@ -30,15 +33,78 @@
   {% else %}
 	<p>There are no products in the shop.</p>
   {% endif %} 
+	<div id="addModal"></div>
+	{% endblock %}  
 	
+	
+	
+{% block jscript %}
 		<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
-		<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
 		<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
 
 <script>
 $(document).ready(function() {
     $('#SuppliersTable').DataTable();
 } );
+
+function getProductList(pk) {
+var url ="{% url 'products-by-supplier' 0 %}".replace('0', pk);
+var products;
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   products += data;
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalProd').modal('show');
+		    $('#ModalProducts').DataTable();
+       }
+     });
+}
+
+function getProductDetail(pk) {
+$('#modalProd').modal('hide');
+var url ="{% url 'product-detail' 0 %}".replace('0', pk);
+var products;
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   products += data;
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalProdDetail').modal('show');
+       }
+     });
+}
+
+function getSupplierDetail(pk) {
+$('#modalProdDetail').modal('hide');
+var url ="{% url 'supplier-detail' 0 %}".replace('0', pk);
+var products;
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   products += data;
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalSupplierDetail').modal('show');
+       }
+     });
+}
+
+function getConfirmDeleteModal(pk) {
+var url ="{% url 'supplier-delete' 0 %}".replace('0', pk);
+var products;
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   products += data;
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalDelete').modal('show');
+       }
+     });
+}
 </script>
 {% endblock %}
 

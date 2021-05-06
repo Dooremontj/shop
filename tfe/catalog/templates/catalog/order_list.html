@@ -1,12 +1,11 @@
 {% extends "index.html" %}
 {% load static %} 
-
+{% block title %}Liste des commandes{% endblock %}
 
 {% block content %}
-<br>
-  <h1>Liste des commandes</h1>
+
   
-    <a href="{% url 'order-create' %} ">Créer commande</a>
+    <a class="btn btn-dark" href="{% url 'order-create' %} ">+ Ajouter une commande</a>
   {% if order_list %}
   <table class="datatable table table-striped" id="OrdersTable" >
 		<thead>
@@ -14,32 +13,64 @@
 				<th scope="col">Titre</th>
 				<th scope="col">Date</th>
 				<th scope="col">Personne</th>
-				<th scope="col">Editer</th>
-				<th scope="col">Supprimer</th>
+				<th scope="col"></th>
+<!-- 				<th scope="col">Editer</th>
+				<th scope="col">Supprimer</th> -->
 			</tr>
 		</thead>
 		<tbody id="myTable">
     {% for order in order_list %}
 	<tr >
-				<th><a href="{{ order.get_absolute_url }}">{{ order.title }}</a></th>
+				<td scope="row"><a href=# onclick="getOrderDetail({{ order.id }})">{{ order.title }}</a></td>
 				<td>{{ order.date }}</td>
 				<td>{{ order.order_user }}</td>
-				<td></td>
+				<td ><a href=# onclick="getConfirmDeleteModal({{ order.id }})" class="fa fa-pencil" ><img src="/static/media/icon/delete.png " alt="{{ order.title }}"></a></td>
 			</tr>
-		<!-- <a href="{% url 'order-update' order.id %} ">Editer :{{ order.title }}</a> -->
     {% endfor %}
    		</tbody>
 	</table>
   {% else %}
     <p>There are no orders in the shop.</p>
   {% endif %} 
+    <div id="addModal"></div>
+  {% endblock %}  
+{% block jscript %}
   		<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
-		<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
 		<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
 
 <script>
 $(document).ready(function() {
-    $('#OrdersTable').DataTable();
+    $('#OrdersTable').DataTable({
+        "order": [[ 1, "desc" ]]
+    } );
 } );
+
+function getConfirmDeleteModal(pk) {
+var url ="{% url 'order-delete' 0 %}".replace('0', pk);
+var products;
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   products += data;
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalDelete').modal('show');
+       }
+     });
+}
+
+function getOrderDetail(pk) {
+var url ="{% url 'order-detail' 0 %}".replace('0', pk);
+var products;
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   products += data;
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalProdDetail').modal('show');
+       }
+     });
+}
 </script>
 {% endblock %}

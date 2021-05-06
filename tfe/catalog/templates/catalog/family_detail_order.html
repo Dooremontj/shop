@@ -1,0 +1,56 @@
+{% load static %}
+
+{% block content %}
+<div class="modal fade" id="modalResidentOrderDetail" tabindex="-1" role="dialog"
+        aria-labelledby="modalResidentOrderDetail" aria-hidden="true"
+         data-keyboard="false" data-dismiss="modal">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			{% if order_list %}
+			    {% for order in order_list %}
+			<div>
+				<table class="datatable table table-striped" class="OrdersTable" >
+					<thead>
+
+					</thead>
+					<tbody id="myTable">
+
+						<tr>
+							<td colspan="2">{{ order.order_user }}</td>
+						</tr>
+						<tr>
+							<th scope="col">Titre</th>
+							<th scope="col">Date</th>
+						</tr>
+						<tr >
+							<td>{{ order.title }}</td>
+							<td>{{ order.date }}</td>
+						</tr>
+						<tr>
+							<th scope="col">Produit</th>
+							<th scope="col">Quantité</th>
+						</tr>
+			{% for orderitem in order.orderitem_set.all %}
+
+						<tr>
+							<td id="orderdetail">{{ orderitem.product.prod_name }}</td>
+							<td>{{ orderitem.qty }}</td>
+						</tr>
+
+			{% endfor %}
+
+
+					</tbody>
+				</table>
+			</div>
+			 {% endfor %}
+  {% else %}
+			<p>There are no orders in the shop.</p>
+  {% endif %} 
+
+
+		</div>
+	</div>
+</div>
+
+{% endblock %}

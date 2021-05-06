@@ -1,11 +1,11 @@
 {% extends "index.html" %}
 {% load static %} 
-
+{% load auth_extras %}
+{% block title %}Liste des produits{% endblock %}
 {% block content %}
-<br>
-	<h1>Liste des produits</h1>
+	
 
-	<a href="{% url 'product-create' %} ">Ajouter un nouveau produit</a>
+<a class="btn btn-dark" href="{% url 'product-create' %} ">+ Ajouter un produit</a>
   {% if product_list %}
   	<table class="datatable table table-striped" id="example" >
 		<thead>
@@ -13,36 +13,99 @@
 				<th scope="col">Image</th>
 				<th scope="col">Produit</th>
 				<th scope="col">Stock</th>
+				{% if request.user|has_group:"Shop Members" %}
 				<th scope="col">Fournisseur</th>
-				<th scope="col">Editer</th>
-				<th scope="col">Supprimer</th>
+				<th scope="col"></th>
+				<th scope="col"></th>
+				{% endif %}
 			</tr>
 		</thead>
 		<tbody id="myTable">
   {% for product in product_list %}
-			<tr >
-				<th scope="row w-25" {% if product.prod_stock <= product.prod_min %} bgcolor="crimson important!" {% endif %}><img width="100" height="100" src="{{ product.prod_img.url }} " alt="{{ product.prod_name }}" class="img-fluid img-thumbnail"></th>
-				<td scope="row" {% if product.prod_stock <= product.prod_min %} bgcolor="crimson important!" {% endif %}><a href="{{ product.get_absolute_url }}">{{ product.prod_name }}</a></td>
-				<td {% if product.prod_stock <= product.prod_min %} bgcolor="crimson important!" {% endif %}>{{product.prod_stock}}</td>
-				<td {% if product.prod_stock <= product.prod_min %} bgcolor="crimson important!" {% endif %}><a href="{% url 'supplier-detail' product.prod_supplier.pk %}">{{ product.prod_supplier }}</a></td>
-				<td {% if product.prod_stock <= product.prod_min %} bgcolor="crimson important!" {% endif %}><a href="{% url 'product-update' product.id %} ">Editer :{{ product.prod_name }}</a></td>
-				<td {% if product.prod_stock <= product.prod_min %} bgcolor="crimson important!" {% endif %}><a href="{% url 'product-delete' product.id %}"> Supprimer</a></td>
+			<tr>
+				<td scope="row w-25" ><img width="100" height="100" src="{{ product.prod_img.url }} " alt="{{ product.prod_name }}" class="img-fluid img-thumbnail"></td>
+				<!--<td scope="row" ><a href="{{ product.get_absolute_url }}">{{ product.prod_name }}</a></td> -->
+				<td scope="row" ><a href=# onclick="getProductDetail({{ product.id }})" class="fa fa-pencil">{{ product.prod_name }}</a></td>
+				<td {% if request.user|has_group:"Shop Members" %} {% if product.prod_stock <= product.prod_min %} class="warning-stock" {% endif %}{% endif %} >
+				<a href=# onclick="getRestock({{product.id }})" class="fa fa-pencil">
+				{{product.prod_stock}}</a></td>
+				{% if request.user|has_group:"Shop Members" %}
+				<td ><a href=# onclick="getSupplierDetail({{product.prod_supplier.pk }})" class="fa fa-pencil">{{ product.prod_supplier }}</a></td>
+				<td class="td-img-action"><a href="{% url 'product-update' product.id %} "><img src="/static/media/icon/edit.png " alt="{{ product.prod_name }}"></a></td>
+				<td ><a href=# onclick="getConfirmDeleteModal({{ product.id }})" class="fa fa-pencil" ><img src="/static/media/icon/delete.png " alt="{{ product.prod_name }}"></a></td>
+				{% endif %}
 			</tr>
   {% endfor %}
   		</tbody>
 	</table>
   {% else %}
 	<p>There are no products in the shop.</p>
-  {% endif %} 
-	
+  {% endif %}
+  <div id="addModal"></div>
+{% endblock %}  
+{% block jscript %}
 		<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
-		<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+
 		<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
 
 <script>
+
+
 $(document).ready(function() {
     $('#example').DataTable();
 } );
+
+function getConfirmDeleteModal(pk) {
+var url ="{% url 'product-delete' 0 %}".replace('0', pk);
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalDelete').modal('show');
+       }
+     });
+}
+
+function getRestock(pk) {
+var url ="{% url 'product-restock' 0 %}".replace('0', pk);
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalProdRestock').modal('show');
+       }
+     });
+}
+
+function getProductDetail(pk) {
+var url ="{% url 'product-detail' 0 %}".replace('0', pk);
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalProdDetail').modal('show');
+       }
+     });
+}
+
+function getSupplierDetail(pk) {
+$('#modalProdDetail').modal('hide');
+var url ="{% url 'supplier-detail' 0 %}".replace('0', pk);
+var products;
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   products += data;
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalSupplierDetail').modal('show');
+       }
+     });
+}
+
 </script>
 {% endblock %}
 

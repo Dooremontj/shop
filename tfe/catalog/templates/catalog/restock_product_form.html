@@ -1,0 +1,24 @@
+
+{% load static %}
+{% block content %}
+<div class="modal fade" id="modalProdRestock" tabindex="-1" role="dialog"
+        aria-labelledby="modalProdRestock" aria-hidden="true"
+         data-keyboard="false" data-dismiss="modal">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<p>Produit : {{product.prod_name}}</p>
+			<p>Stock : {{product.prod_stock}}</p>
+
+			<form action="{% url 'product-restock' product.id %}" method="post">
+			  <div class="form-group">
+ {% csrf_token %}
+				<table>
+ {{ form }}
+				</table>
+				<input class="btn btn-success" type="submit" value="Valider" />
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+{% endblock %}

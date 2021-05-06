@@ -1,15 +1,13 @@
 {% extends "index.html" %}
 {% load static %}
 
-{% block title %}{% endblock %}
+{% block title %}Nouvelle commande{% endblock %}
 {% block content %}
-    <h2>Profile</h2>
-    <hr>
     <div class="col-md-4">
-	<p id="name"> {{ user }}<p>
         <form action="" method="post">{% csrf_token %}
             {{ form.as_p }}
-
+	<a class="btn btn-dark" id="Resident_detail_function" onclick="getResidentDetail(1)">Détail</a>
+	<a class="btn btn-dark" id="Resident_detail_order_function" onclick="getResidentOrderDetail(1)">Historique commande</a>
             <table class="table">
                 {{ orderlist.management_form }}
 
@@ -39,11 +37,14 @@
                     </tr>
                 {% endfor %}
             </table>
-            <input type="submit" value="Save"/> <a href="{% url 'orders' %}">back to the list</a>
+            <input class="btn btn-success" type="submit" value="Valider"/> 
+			<a class="btn btn-dark" href="{% url 'orders' %} ">Annuler</a>
         </form>
     </div>
+	  <div id="addModal"></div>
+{% endblock %}
+{% block jscript %}
 
-<script type="text/javascript" src="{% static 'admin/js/vendor/jquery/jquery.js' %}"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.formset/1.2.2/jquery.formset.js"></script>
 {{ orderlist.media }}
 
@@ -52,8 +53,8 @@
 var prod 
 
     $('.formset_row').formset({
-        addText: 'add family member',
-        deleteText: 'remove',
+        addText: '+',
+        deleteText: 'Supprimer',
         prefix: 'orderitem_set'
     });
 
@@ -77,23 +78,66 @@ var prod
 })($)
 
 $(document).ready(function () {     
-$('#id_order_user').change(function(){
-var name = $("#id_order_user option:selected").html();;
-document.getElementById('name').innerHTML = prod[0].fields.prod_name ;
-})
+	$('#id_order_user').change(function(){
+		var name = $("#id_order_user option:selected");
+		console.log(name[0].value)
+		var clickfun = document.getElementById("Resident_detail_function").getAttribute("onclick");
+		var getResidentDetail = clickfun.substring(0,clickfun.indexOf("(")); 
+		document.getElementById("Resident_detail_function").setAttribute("onclick",getResidentDetail+"("+name[0].value+")");
+		var clickfun = document.getElementById("Resident_detail_order_function").getAttribute("onclick");
+		var getResidentOrderDetail = clickfun.substring(0,clickfun.indexOf("(")); 
+		document.getElementById("Resident_detail_order_function").setAttribute("onclick",getResidentOrderDetail+"("+name[0].value+")");
+	})
 });
 
-
-$(document).ready(function(){
-    $.ajax({
+$(document).ready(function () {    
+	var utc = new Date();
+	var dd = String(utc.getDate()).padStart(2, '0');
+	var mm = String(utc.getMonth() + 1).padStart(2, '0'); //January is 0!
+	var yyyy = utc.getFullYear();
+	utc = dd + mm + yyyy;
+	$.ajax({
        type: "GET",
-       url: "{% url 'test' %}",
+       url: "{% url 'order-last-id' %}",
        success: function(data) {
-		   prod = data
-           alert(data[0].fields.prod_name);
+		   console.log(data)
+		   document.getElementById('id_title').value = "AMC_"+utc+"_"+data ;
        }
      });
+	<!-- document.getElementById('id_title').value = "AMC_"+utc+"_"+Date.now() ; -->
 });
+
+function getResidentDetail(pk) {
+var url ="{% url 'resident-detail-family' 0 %}".replace('0', pk);
+var products;
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   products += data;
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalResidentDetail').modal('show');
+       }
+     });
+}
+
+function getResidentOrderDetail(pk) {
+var url ="{% url 'resident-detail-order' 0 %}".replace('0', pk);
+var products;
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   products += data;
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalResidentOrderDetail').modal('show');
+       }
+     });
+}
+
+
+
+
 
 </script>
 

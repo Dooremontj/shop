@@ -1,0 +1,41 @@
+{% load static %}
+
+{% block content %}
+<div class="modal fade" id="modalResidentDetail" tabindex="-1" role="dialog"
+        aria-labelledby="modalResidentDetail" aria-hidden="true"
+         data-keyboard="false" data-dismiss="modal">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+  <h2>Nombre : {{ familynumber }}</h2>
+  <h2>Nombre enfant : {{ child }}</h2>
+</div>
+  <table class="datatable table table-striped" id="example" >
+		<thead>
+			<tr>
+				<th scope="col">Nom</th>
+				<th scope="col">Prénom</th>
+				<th scope="col">Chambre</th>
+				<th scope="col">age</th>
+				<th scope="col">sexe</th>
+			</tr>
+		</thead>
+		<tbody id="myTable">
+  {% for member in family %}
+			<tr>
+				<th>{{ member.name }}</th>
+				<td>{{ member.firstname }}</td>
+				<td>{{ member.room }}</td>
+				<td>{{ member.age }}</td>
+				<td>{{ member.sexe }}</td>
+			</tr>
+  {% endfor %}
+  		</tbody>
+	</table>
+
+			</div>
+		</div>
+	</div>
+
+
+{% endblock %}

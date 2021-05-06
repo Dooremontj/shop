@@ -1,0 +1,21 @@
+{% load static %}
+
+{% block content %}
+<div class="modal fade" id="modalResidentDetail" tabindex="-1" role="dialog"
+        aria-labelledby="modalResidentDetail" aria-hidden="true"
+         data-keyboard="false" data-dismiss="modal">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+  <h3>{{ resident.badge }}</h3>
+</div>
+  <p><strong>date :</strong>{{ resident.name}}</p> <!-- author detail link not yet defined -->
+  <div style="margin-left:20px;margin-top:20px">
+   
+
+			</div>
+		</div>
+	</div>
+
+
+{% endblock %}

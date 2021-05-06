@@ -22,12 +22,12 @@ class Resident(models.Model):
     
     class Meta:
         verbose_name = "Résident"
-        ordering = ['badge']
+        ordering = ['badge','family_group','firstname']
         
     def __str__(self):
         """Cette fonction est obligatoirement requise par Django.
            Elle retourne une chaîne de caractère pour identifier l'instance de la classe d'objet."""
-        return self.name
+        return self.badge+" - "+self.family_group +" ("+self.name+" "+self.firstname+")"
 
 
 # Fournisseur
@@ -60,8 +60,8 @@ class Product(models.Model):
     prod_min = models.PositiveIntegerField(verbose_name="Quantité minimal", default='0')
     prod_max = models.PositiveIntegerField(verbose_name="Quantité maximal", default='1')
     prod_ref_in = models.CharField(max_length=100, verbose_name="Référence interne", blank=True, unique=True, error_messages={'unique':"La référence interne existe déja"})
-    prod_ref_out = models.CharField(max_length=100, verbose_name="Référence externe", blank=True)
-    prod_supplier = models.ForeignKey('Supplier', on_delete=models.SET_NULL, null=True)
+    prod_supplier = models.ForeignKey('Supplier',verbose_name="Fournisseur", on_delete=models.SET_NULL, null=True)
+    prod_ref_out = models.CharField(max_length=100, verbose_name="Référence externe", blank=True) 
     prod_date_create = models.DateTimeField(auto_now_add=True, verbose_name="Date d'ajout", blank=True)
     prod_date_update = models.DateTimeField(auto_now=True, verbose_name="Date de modification", blank=True)
     prod_img = models.ImageField(upload_to='img/product', default='img/product/default_product.png', verbose_name="Image du produit", blank=True)
@@ -71,7 +71,7 @@ class Product(models.Model):
         ordering = ['prod_name']
 
     def __str__(self):
-        return self.prod_name +" - stock : "+ str(self.prod_stock)
+        return self.prod_name
     
     def get_absolute_url(self):
         return reverse('product-detail', args=[str(self.id)])
@@ -86,10 +86,10 @@ class Product(models.Model):
 # Commande
 
 class Order (models.Model):
-    date = models.DateTimeField(default=datetime.datetime.now())
+    date = models.DateTimeField(default=datetime.datetime.now)
     title = models.CharField(blank=True, max_length=150)
     timestamp = models.DateField(auto_now_add=True)
-    order_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    order_user = models.ForeignKey(Resident, on_delete=models.CASCADE, null=True)
 
     class Meta:
         verbose_name = "Commande"
@@ -108,9 +108,9 @@ class Order (models.Model):
     def get_delete_url(self):
         return reverse('delete_order', kwargs={'pk': self.id})
         
-@receiver(post_save, sender=Order)
-def send_mail(sender, instance, **kwargs):
-    email_new_order(instance)
+# @receiver(post_save, sender=Order)
+# def send_mail(sender, instance, **kwargs):
+    # email_new_order(instance)
     
       
 class OrderItem(models.Model):

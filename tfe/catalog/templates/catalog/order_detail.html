@@ -1,22 +1,30 @@
-{% extends "index.html" %}
+
 {% load static %}
-{% block title %}Détail de la commande{% endblock %}
 
 {% block content %}
-<br>
-  <h1>Nom de la commande: {{ order.title }}</h1>
-
-  <p><strong>date :</strong>{{ order.date }}</p> <!-- author detail link not yet defined -->
+<div class="modal fade" id="modalProdDetail" tabindex="-1" role="dialog"
+        aria-labelledby="modalProdDetail" aria-hidden="true"
+         data-keyboard="false" data-dismiss="modal">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+  <h3>{{ order.title }}</h3>
+</div>
+  <p><strong>date : </strong>{{ order.date }}</p> <!-- author detail link not yet defined -->
   <div style="margin-left:20px;margin-top:20px">
-    <h4>Ligne commande</h4>
+    <h4>Produits :</h4>
 
     {% for orderitem in order.orderitem_set.all %}
-      <hr>
-      <p> produit : {{ orderitem.product }} </p>
-      <p><strong>qty :</strong> {{ orderitem.qty }}</p>
+      <div>
+	  <div id="orderdetail"><img width="100" height="100" src="{{ orderitem.product.prod_img.url }}" alt="{{ order.product.prod_name }}" class="img-fluid img-thumbnail"></div>
+      <div id="orderdetail"><div>produit : {{ orderitem.product.prod_name }}</div>
+	  <div><strong>quantité :</strong> {{ orderitem.qty }}</div></div></div>
 
    {% endfor %}
-  </div>
+
+			</div>
+		</div>
+	</div>
 
 
 {% endblock %}

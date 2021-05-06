@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="fr">
 	<head>
+	<link rel="shortcut icon" href="#" />
     {% load static %}  
 		<title>{% block title %}Shop Fedasil{% endblock %}</title>
+				{% block link %} 
+			<link rel="stylesheet"  type="text/css" href="{% static 'css/style.css'  %}"/>
+		{% endblock %}
 		{% load bootstrap4 %}
 		{# Load CSS and JavaScript #}
 		{% bootstrap_css %}
 		{% bootstrap_javascript jquery='full' %}
-		{% block link %} 
-		{% endblock %}
+
 		{% block scripts %}
 		{% endblock %}
-
+		{% load auth_extras %}
 	</head>
 	<body>
 		<header>Shop AMC</header>
@@ -20,23 +23,28 @@
 			<div class="collapse navbar-collapse" id="navbarCollapse">
 
 				<ul class="navbar-nav mr-auto">
-				
+				{% if user.is_authenticated %}
 					<li class="nav-item">
 						<a class="nav-link active" aria-current="page" href="{% url 'index' %}">Accueil</a>
 					</li>
 					<li>
-						<a class="nav-link" href="{% url 'products' %}">Liste produits</a>
+						<a class="nav-link" href="{% url 'products' %}">Produits</a>
+					</li>	
+					{% if request.user|has_group:"Shop Members" %}
+					<li>
+						<a class="nav-link" href="{% url 'orders' %}">Shop</a>
 					</li>
 					<li>
-						<a class="nav-link" href="{% url 'suppliers' %}">Liste fournisseurs</a>
+						<a class="nav-link" href="{% url 'suppliers' %}">Fournisseurs</a>
 					</li>
 					<li>
-						<a class="nav-link" href="{% url 'orders' %}">Liste commande</a>
+						<a class="nav-link" href="{% url 'residents' %}">Residents</a>
 					</li>
-				{% if user.is_authenticated %}
-					<li><a href="{% url 'logout'%}">Logout</a></li>
+					{% endif %} 
+					<li><a class="nav-link" href="{% url 'logout'%}">Se déconnecter</a></li>
 				{% else %}
-					<li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>
+					<li><a class="nav-link" href="{% url 'login'%}?next={{request.path}}">Se connecter</a></li>
+					<li><a class="nav-link" href="{% url 'register'%}">Inscription</a></li>
 				{% endif %} 
 				</ul>
 			</li>
@@ -48,45 +56,12 @@
  {% endblock %}
 <main role="main" class="container">
 	<section id="content"><br><br>
-	{% block pagination %}
-    {% if is_paginated %}
-        <div class="pagination">
-            <span class="page-links">
-                {% if page_obj.has_previous %}
-                    <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
-                {% endif %}
-                <span class="page-current">
-                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                </span>
-                {% if page_obj.has_next %}
-                    <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
-                {% endif %}
-            </span>
-        </div>
-    {% endif %}
-  {% endblock %}
        {% block content %}
 	   {% endblock %}
- 	<section id="content"><br><br>
-	{% block pagination_bottom %}
-    {% if is_paginated %}
-        <div class="pagination">
-            <span class="page-links">
-                {% if page_obj.has_previous %}
-                    <a href="{{ request.path }}?page={{ page_obj.previous_page_number }}">previous</a>
-                {% endif %}
-                <span class="page-current">
-                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                </span>
-                {% if page_obj.has_next %}
-                    <a href="{{ request.path }}?page={{ page_obj.next_page_number }}">next</a>
-                {% endif %}
-            </span>
-        </div>
-    {% endif %}
-  {% endblock %}
-	</section>
+ 	
 </main>
 <footer>&copy; Fedasil</footer>
+
+{% block jscript %}{% endblock %}
 </body>
 </html>

@@ -1,15 +1,26 @@
-{% extends "index.html" %}
 {% load static %}
-{% block title %}Détail fournisseur{% endblock %}
 
 {% block content %}
-<br>
-  <h1>Nom du fournisseur: {{ supplier.supplier_name }}</h1>
-
-  <p><strong>Adresse :</strong>{{ supplier.supplier_address }}</p> <!-- author detail link not yet defined -->
-  <p><strong>E-mail :</strong> {{ supplier.supplier_mail }}</p>
-  <p><strong>Téléphone :</strong> {{ supplier.supplier_tel }}</p>
-
+<div class="modal fade" id="modalSupplierDetail" tabindex="-1" role="dialog"
+        aria-labelledby="modalSupplierDetail" aria-hidden="true"
+         data-keyboard="false" data-dismiss="modal">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h1>{{ supplier.supplier_name }}</h1>
+			</div>
+			<div class="modal-body">
+				<p>
+					<strong>Adresse : </strong>{{ supplier.supplier_address }}</p>
+				<!-- author detail link not yet defined -->
+				<p>
+					<strong>E-mail : </strong><a href="mailto:{{ supplier.supplier_mail }}">{{ supplier.supplier_mail }}</a></p>
+				<p>
+					<strong>Téléphone : </strong> {{ supplier.supplier_tel }}</p>
+	
+				</div>
+			</div>
+		</div>
 
 
 {% endblock %}

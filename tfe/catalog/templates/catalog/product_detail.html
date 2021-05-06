@@ -1,20 +1,35 @@
-{% extends "index.html" %}
 {% load static %}
-{% block title %}Détail produit{% endblock %}
 
 {% block content %}
-<br>
-  <h1>Nom du produit: {{ product.prod_name }}</h1>
+<div class="modal fade" id="modalProdDetail" tabindex="-1" role="dialog"
+        aria-labelledby="modalProdDetail" aria-hidden="true"
+         data-keyboard="false" data-dismiss="modal">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+			<img width="100" height="100" src="{{ product.prod_img.url }} " alt="{{ product.prod_name }}" class="img-fluid img-thumbnail">
+			<h1>{{ product.prod_name }}</h1>
+				</div>
+				 <div class="modal-body">
+					<p>
+						<strong>Stock : </strong>{{ product.prod_stock }}</p>
+					<!-- author detail link not yet defined -->
+					<p>
+						<strong>Quantité max :</strong> {{ product.prod_max }}</p>
+					<p>
+						<strong>Quantité min :</strong> {{ product.prod_min }}</p>
+					<p>
+						<strong>Référence interne :</strong> {{ product.prod_ref_in }}</p>
+					<p>
+						<strong>Fournisseur :</strong>
+						<a onclick="getSupplierDetail({{product.prod_supplier.pk }})"> {{ product.prod_supplier }}</a>
+					</p>
+					<p>
+						<strong>Référence externe :</strong> {{ product.prod_ref_out }}</p>
+						</div>
 
-  <p><strong>Stock:</strong>{{ product.prod_stock }}</p> <!-- author detail link not yet defined -->
-  <p><strong>Quantité max :</strong> {{ product.prod_max }}</p>
-  <p><strong>Quantité min :</strong> {{ product.prod_min }}</p>
-  <p><strong>Référence interne:</strong> {{ product.prod_ref_in }}</p>
-  <p><strong>Fournisseur :</strong>
-	<a href="{% url 'supplier-detail' product.prod_supplier.pk %}">{{ product.prod_supplier }}</a>
-  </p>
-  <p><strong>Référence externe :</strong> {{ product.prod_ref_out }}</p>
-  <p><strong>Image :</strong> {{ product.prod_img }}</p>
-
+			</div>
+		</div>
+	</div>
 
 {% endblock %}

@@ -1,0 +1,75 @@
+#ModalProducts_wrapper{
+  width: 100%;
+}
+
+table{
+	text-align: center;
+}
+
+#myTable td{
+	vertical-align: middle;
+	text-color : black;
+}
+
+#myTable td a{
+	color: black;
+    font-weight: bold;
+}
+
+#myTable td{
+	color: black;
+    font-weight: bold;
+}
+
+#myTable td.warning-stock{
+	color : red;
+    font-weight: bold;
+	border : 3px double crimson;
+	border-radius : 25%;
+
+}
+
+#orderdetail {
+	display : inline-block;
+}
+
+.errorlist {
+	color: red;
+    font-size: small;
+    display: inline;
+    list-style-type: none;
+}
+.errorlist li {
+	color: red;
+    font-size: small;
+    display: inline;
+    list-style-type: none;
+}
+
+.delete-row{
+	color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+	display: inline-block;
+    font-weight: 400;
+	border: 1px solid transparent;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.add-row{
+	color: #fff;
+    background-color: #343a40;
+    border-color: #343a40;
+	display: inline-block;
+    font-weight: 400;
+	border: 1px solid transparent;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}

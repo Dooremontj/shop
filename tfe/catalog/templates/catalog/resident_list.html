@@ -1,0 +1,90 @@
+{% extends "index.html" %}
+{% load static %} 
+{% load auth_extras %}
+{% block title %}Liste des produits{% endblock %}
+{% block content %}
+	
+
+<a class="btn btn-dark" href="{% url 'resident-create' %} ">+ Ajouter un résident</a>
+  {% if resident_list %}
+  	<table class="datatable table table-striped" id="ResidentTable" >
+		<thead>
+			<tr>
+				<th scope="col">badge</th>
+				<th scope="col">Composition familial</th>
+				<th scope="col">Nom</th>
+				<th scope="col">Prénom</th>
+				<th scope="col">Chambre</th>
+				<th scope="col">Age</th>
+				<th scope="col">Sexe</th>
+				<th scope="col"></th>
+				<th scope="col"></th>
+			</tr>
+		</thead>
+		<tbody id="myTable">
+  {% for resident in resident_list %}
+			<tr>
+				
+				<td scope="row" ><a href=# onclick="getResidentDetail({{ resident.id }})" class="fa fa-pencil">{{ resident.badge }}</a></td>
+				<td>{{ resident.family_group }}</td>
+				<td>{{ resident.name }}</td>
+				<td>{{ resident.firstname }}</td>
+				<td>{{ resident.room }}</td>
+				<td>{{ resident.age }}</td>
+				<td>{{ resident.sexe }}</td>
+				<td></td>
+				<td ><a href=# onclick="getConfirmDeleteModal({{ resident.id }})" class="fa fa-pencil" ><img src="/static/media/icon/delete.png " alt="{{ resident.badge }}"></a></td>
+			</tr>
+  {% endfor %}
+  		</tbody>
+	</table>
+  {% else %}
+	<p>Il n'y a pas de résidents enregistrés.</p>
+  {% endif %}
+  <div id="addModal"></div>
+{% endblock %}  
+{% block jscript %}
+		<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+
+		<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+
+<script>
+
+
+$(document).ready(function() {
+    $('#ResidentTable').DataTable();
+} );
+
+function getConfirmDeleteModal(pk) {
+var url ="{% url 'resident-delete' 0 %}".replace('0', pk);
+var products;
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   products += data;
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalDelete').modal('show');
+       }
+     });
+}
+
+function getResidentDetail(pk) {
+var url ="{% url 'resident-detail-family' 0 %}".replace('0', pk);
+var products;
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   products += data;
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalResidentDetail').modal('show');
+       }
+     });
+}
+
+
+
+</script>
+{% endblock %}
+

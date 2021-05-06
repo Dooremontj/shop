@@ -1,13 +1,12 @@
-from django.shortcuts import render
-from catalog.models import Product, Supplier, Order, OrderItem
+from django.shortcuts import render, get_object_or_404
+from catalog.models import Product, Supplier, Order, OrderItem, Resident
 from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
-from django.urls import reverse
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.db import transaction
 from .forms import *
 from dal import autocomplete
@@ -16,32 +15,27 @@ from django.conf import settings
 from django.contrib.auth.models import User, Group
 from django.forms.utils import ErrorList
 from catalog.mail import *
-from django.http import JsonResponse
 from django.core import serializers
+from django.contrib import messages
+
 
 def index(request):
 	return render(request, 'index.html')
+    
+    
+################################################################################################
+#products
+################################################################################################
 
 class ProductListView(generic.ListView):
     model = Product
     #paginate_by = 10
-
+    
 class ProductDetailView(LoginRequiredMixin, generic.DetailView):
     model = Product
     
-class SupplierListView(LoginRequiredMixin, generic.ListView):
-    model = Supplier
-     
-class SupplierDetailView(LoginRequiredMixin, generic.DetailView):
-    model = Supplier
 
-class OrderListView(LoginRequiredMixin, generic.ListView):
-    model = Order
     
-class OrderDetailView(LoginRequiredMixin, generic.DetailView):
-    model = Order
-
-
 def ProductCreate(request):
     if request.method == 'POST':
         form = ProductCreateForm(request.POST, request.FILES)
@@ -54,7 +48,6 @@ def ProductCreate(request):
             'form': form,
     })
     
-
 def ProductUpdate(request, pk):
     instance = get_object_or_404(Product, pk=pk)
     form = ProductUpdateForm(request.POST or None, instance=instance)
@@ -67,6 +60,125 @@ def ProductUpdate(request, pk):
 class ProductDelete(DeleteView):
     model = Product
     success_url = reverse_lazy('products')
+
+def ProductsBySupplierView(request, pk):
+    model = Product
+    products = Product.objects.filter(prod_supplier=pk)
+    return render(request,'catalog/products_by_supplier.html', {'products': products})
+
+class ProductAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        # Don't forget to filter out results depending on the visitor !
+        if not self.request.user.is_authenticated:
+           return Product.objects.none()
+
+        qs = Product.objects.all()
+
+        if self.q:
+            qs = qs.filter(prod_name__istartswith=self.q)
+
+        return qs 
+        
+def ProductRestock(request, pk):
+    instance=get_object_or_404(Product, pk = pk)
+
+    if request.method == 'POST':
+
+        form = RestockProductForm(request.POST)
+
+        if form.is_valid():
+            instance.prod_stock += form.cleaned_data['qty_in']
+            instance.save()
+            return HttpResponseRedirect(reverse('products') )
+
+    else:
+        min = 1
+        form = RestockProductForm(initial={'qty_in': min,})
+
+    return render(request, 'catalog/restock_product_form.html', {'form': form, 'product':instance})
+    
+################################################################################################
+#suppliers
+################################################################################################
+
+class SupplierListView(LoginRequiredMixin, generic.ListView):
+    model = Supplier
+     
+class SupplierDetailView(LoginRequiredMixin, generic.DetailView):
+    model = Supplier
+
+def SupplierCreate(request):
+    if request.method == 'POST':
+        form = SupplierCreateForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('suppliers') )
+    else:
+        form = SupplierCreateForm()
+    return render(request, 'catalog/supplier_create_form.html', {
+            'form': form,
+    })
+
+class SupplierDelete(DeleteView):
+    model = Supplier
+    success_url = reverse_lazy('suppliers')
+    
+################################################################################################    
+#residents
+################################################################################################   
+
+class ResidentListView(LoginRequiredMixin, generic.ListView):
+    model = Resident
+    
+class ResidentDetailView(LoginRequiredMixin, generic.DetailView):
+    model = Resident
+
+def ResidentDetailFamilyView(request, pk):
+    model = Resident
+    instance = get_object_or_404(Resident, pk=pk)
+    family = Resident.objects.filter(badge=instance.badge).order_by('-age')
+    familynumber = family.count()
+    child = 0
+    for f in family:
+        if f.age < 12:
+            child += 1
+    return render(request,'catalog/family_detail.html', {'child':child, 'resident': instance, 'family' : family, 'familynumber':familynumber})
+    
+def ResidentDetailOrderView(request, pk):
+    model = Resident
+    instance = get_object_or_404(Resident, pk=pk)
+    family = Resident.objects.filter(badge=instance.badge)
+    pklist = []
+    for f in family:
+        pklist.append(f.id)
+    order_list = Order.objects.filter(order_user__in=pklist)
+    return render(request,'catalog/family_detail_order.html', {'order_list':order_list})
+
+class ResidentDelete(DeleteView):
+    model = Resident
+    success_url = reverse_lazy('residents')
+    
+def ResidentCreate(request):
+    if request.method == 'POST':
+        form = ResidentCreateForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect(reverse('resident') )
+    else:
+        form = ResidentCreateForm()
+    return render(request, 'catalog/resident_create_form.html', {
+            'form': form,
+    })
+################################################################################################    
+#Orders
+################################################################################################   
+    
+
+class OrderListView(LoginRequiredMixin, generic.ListView):
+    model = Order
+    
+class OrderDetailView(LoginRequiredMixin, generic.DetailView):
+    model = Order
 
 class OrderDelete(DeleteView):
     model = Order
@@ -94,14 +206,21 @@ class OrderItemCreate(CreateView):
         d = dict()
         for f in orderlist:
             if f.is_valid():
-                prod = f.cleaned_data['product']
-                if prod.id in d :
-                    qty = d.get(prod.id)
-                    qty += f.cleaned_data['qty']
-                    d[prod.id] = qty
-                else:
-                    qty = f.cleaned_data['qty']
-                    d[prod.id] = qty
+                if f.cleaned_data.get('product') is None :
+                    form.add_error(None,'Aucun produit sélectionner')
+                    can_save = False
+                if f.cleaned_data.get('qty') is None :
+                    form.add_error(None,'La quantité ne peut pas être nulle')
+                    can_save = False
+                else : 
+                    prod = f.cleaned_data['product']
+                    if prod.id in d :
+                        qty = d.get(prod.id)
+                        qty += f.cleaned_data['qty']
+                        d[prod.id] = qty
+                    else:
+                        qty = f.cleaned_data['qty']
+                        d[prod.id] = qty
         for key in d :
             product = Product.objects.get(pk=key)
             if product.prod_stock < d.get(key):
@@ -153,24 +272,43 @@ class OrderUpdate(UpdateView):
     def get_success_url(self):
         return reverse_lazy('order-detail', kwargs={'pk': self.object.pk})
         
+def OrderLastID(request):
+    model = Order
+    instance = Order.objects.latest('id')
+    return HttpResponse(instance.id+1)
 
-class ProductAutocomplete(autocomplete.Select2QuerySetView):
+
+    
+    
+    
+
+        
+class ResidentAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
         # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated:
-           return Product.objects.none()
+           return Resident.objects.none()
 
-        qs = Product.objects.all()
+        qs = Resident.objects.all()
 
         if self.q:
-            qs = qs.filter(prod_name__istartswith=self.q)
+            qs = qs.filter(badge__istartswith=self.q)
 
         return qs
 
-def test(request):
-    qs = Product.objects.all()
-    qs_json = serializers.serialize('json', qs)
-    return HttpResponse(qs_json, content_type='application/json')
+    
+def register_request(request):
+	if request.method == "POST":
+		form = NewUserForm(request.POST)
+		if form.is_valid():
+			user = form.save()
+			login(request, user)
+			messages.success(request, "Registration successful." )
+			return HttpResponseRedirect(reverse('products'))
+		form.add_error(None,request, "Unsuccessful registration. Invalid information.")
+	form = NewUserForm()
+	return render (request=request, template_name="register.html", context={"form":form})
+   
 # def email_new_order(request):
     # users = User.objects.filter(groups__name='Shop Members')
     # for user in users:

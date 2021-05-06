@@ -2,13 +2,22 @@
 
 {% block content %}
 
-<h1>Delete Order</h1>
+<div class="modal fade" id="modalDelete" tabindex="-1" role="dialog"
+        aria-labelledby="modalProd" aria-hidden="true"
+         data-keyboard="false" data-dismiss="modal">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
 
-<p>Are you sure you want to delete the order: {{ order }}?</p>
+				<p>Êtes-vous sûr de voulour supprimer: {{ order }}?</p>
 
-<form action="" method="POST">
+				<form action="{% url 'order-delete' order.id %}" method="POST">
   {% csrf_token %}
-  <input type="submit" value="Yes, delete.">
-</form>
+					<input class="btn btn-danger" type="submit" value="Oui, supprimer.">
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
 
 {% endblock %}
