@@ -12,6 +12,9 @@ urlpatterns = [
     path('product/<int:pk>/update/', login_required(views.ProductUpdate), name='product-update'),
     path('product/<int:pk>/delete/', login_required(views.ProductDelete.as_view()), name='product-delete'),
     path('product/<int:pk>/restock/', login_required(views.ProductRestock), name='product-restock'),
+    path('product/shop/', login_required(views.ProductListShop), name='product-shop'),
+    path('product/addtobasket/', login_required(views.AddBasket), name='add-basket'),
+    path('basket/', login_required(views.BasketListView), name='basket'),
     #Gestion Commande
     path('order/', login_required(views.OrderListView.as_view()), name='orders'),
     path('order/<int:pk>', views.OrderDetailView.as_view(), name='order-detail'),

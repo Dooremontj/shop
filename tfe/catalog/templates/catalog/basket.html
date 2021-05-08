@@ -1,0 +1,62 @@
+{% extends "index.html" %}
+{% load static %} 
+{% load auth_extras %}
+{% block title %}Liste des produits{% endblock %}
+{% block content %}
+<br><br>
+  {% if product_list %}
+<table class="datatable table table-striped" id="Basket" >
+	<thead>
+		<tr>
+			<th scope="col">Image</th>
+			<th scope="col">Produit</th>
+			<th scope="col">Quantité</th>
+		</tr>
+	</thead>
+	<tbody id="myTable">
+  {% for product in product_list %}
+		<tr>
+			<td scope="row w-25" >
+				<img width="100" height="100" src="{{ product.product.prod_img.url }} " alt="{{ product.product.prod_name }}" class="img-fluid img-thumbnail">
+				</td>
+				<td scope="row" >
+					<a href=# onclick="getProductDetail({{ product.product.id }})" class="fa fa-pencil">{{ product.product.prod_name }}</a>
+				</td>
+				<td>{{ product.qty }}</td>
+		</tr>
+  {% endfor %}
+	</tbody>
+</table>
+  {% else %}
+<p>There are no products in your basket.</p>
+  {% endif %}
+  <div id="addModal"></div>
+{% endblock %}  
+{% block jscript %}
+		<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+
+		<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+
+<script>
+
+
+$(document).ready(function() {
+    $('#Basket').DataTable();
+} );
+
+
+function getProductDetail(pk) {
+var url ="{% url 'product-detail' 0 %}".replace('0', pk);
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalProdDetail').modal('show');
+       }
+     });
+}
+
+
+</script>
+{% endblock %}

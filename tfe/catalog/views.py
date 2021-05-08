@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from catalog.models import Product, Supplier, Order, OrderItem, Resident
+from catalog.models import Product, Supplier, Order, OrderItem, Resident, Basket
 from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -34,7 +34,20 @@ class ProductListView(generic.ListView):
 class ProductDetailView(LoginRequiredMixin, generic.DetailView):
     model = Product
     
+def ProductListShop(request):
+    products = Product.objects.all()
+    return render(request,'catalog/product_list_shop.html', {'product_list':products})
 
+def AddBasket(request):
+    if request.method == 'POST':
+        productselected = get_object_or_404(Product, pk=request.POST.get('product'))
+        instance = Basket(product=productselected , qty=request.POST.get('qty') , user_basket=request.user)
+        instance.save()
+    return HttpResponseRedirect(reverse('product-shop') )
+    
+def BasketListView(request):
+    product_list = Basket.objects.filter(user_basket=request.user)
+    return render(request,'catalog/basket.html', {'product_list':product_list})
     
 def ProductCreate(request):
     if request.method == 'POST':
@@ -237,8 +250,8 @@ class OrderItemCreate(CreateView):
                 product = Product.objects.get(pk=key)
                 product.prod_stock = product.prod_stock-d.get(key)
                 product.save()
-                if product.prod_stock <= product.prod_min:
-                    email_warning_stock(product)
+                # if product.prod_stock <= product.prod_min:
+                    # email_warning_stock(product)
             return response
         else:
             return super().form_invalid(form)

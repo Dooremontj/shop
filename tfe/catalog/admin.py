@@ -1,5 +1,5 @@
 from django.contrib import admin
-from catalog.models import Supplier, Product, Order, OrderItem, Resident
+from catalog.models import Supplier, Product, Order, OrderItem, Resident, Basket
 from catalog.forms import *
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
@@ -30,6 +30,10 @@ class SupplierAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Basket)
+class BasketAdmin(admin.ModelAdmin):
     pass
 
 # Register the admin class with the associated model

@@ -6,6 +6,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 import datetime
 from catalog.mail import *
+from django.contrib.auth.models import User
 
 #Resident 
 
@@ -14,9 +15,9 @@ class Resident(models.Model):
     family_group = models.CharField(max_length=2, verbose_name="Composition familiale", blank=True)
     name = models.CharField(max_length=100, verbose_name="Nom", blank=True)
     firstname = models.CharField(max_length=100, verbose_name="Prénom", blank=True)
-    room = models.IntegerField(max_length=5, verbose_name="Chambre", blank=True)
+    room = models.IntegerField(verbose_name="Chambre", blank=True)
     #birthdate = models.DateTimeField(max_length=100, verbose_name="Date de naissance", blank=True)
-    age = models.IntegerField(max_length=3,verbose_name="Age", blank=True)
+    age = models.IntegerField(verbose_name="Age", blank=True)
     #datein = models.DateTimeField(max_length=100,verbose_name="Date d'arrivée", blank=True)
     sexe = models.CharField(max_length=1, verbose_name="Sexe", blank=True)
     
@@ -78,12 +79,7 @@ class Product(models.Model):
 
 
 
-
-
-
-
-
-# Commande
+# Commande Resident
 
 class Order (models.Model):
     date = models.DateTimeField(default=datetime.datetime.now)
@@ -134,7 +130,19 @@ def delete_order_item(sender, instance, **kwargs):
     product.prod_stock += instance.qty
     product.save()
     instance.order.save()
+
+
+class Basket(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    qty = models.PositiveIntegerField(default=1)
+    user_basket = models.ForeignKey(User, on_delete=models.CASCADE)
     
+    class Meta:
+        verbose_name = "ligne de panier"
+        
+    def __str__(self):
+        return f'{self.product.prod_name}'
+        
 # @receiver(post_save, sender=OrderItem)
 # def save_order_item(sender, instance, **kwargs):
     # product = instance.product
