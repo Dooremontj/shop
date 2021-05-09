@@ -19,7 +19,8 @@
   {% for product in product_list %}
 		<tr>
 			<td scope="row w-25" >
-				<img width="100" height="100" src="{{ product.prod_img.url }} " alt="{{ product.prod_name }}" class="img-fluid img-thumbnail">
+			<a href=# onclick="getProductDetail({{ product.id }})" class="fa fa-pencil">
+				<img width="100" height="100" src="{{ product.prod_img.url }} " alt="{{ product.prod_name }}" class="img-fluid img-thumbnail"></a>
 				</td>
 				<td scope="row" >
 					<a href=# onclick="getProductDetail({{ product.id }})" class="fa fa-pencil">{{ product.prod_name }}</a>
@@ -27,9 +28,9 @@
 				<td>{{product.prod_stock}}</td>
 				<form action="{% url 'add-basket' %}" method="post">
 				 {% csrf_token %}
-					<td><input type="hidden" id="product" name="product" value="{{ product.id }}"><input type="number" min="0" id="qty" name="qty"></td>
+					<td><input type="hidden" name="product" value="{{ product.id }}"><input type="number" min="1" name="qty" value="1"></td>
 					<td><input class="btn btn-success" type="submit" value="+" /></td>
-			</form>
+				</form>
 		</tr>
   {% endfor %}
 	</tbody>

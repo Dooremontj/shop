@@ -7,6 +7,7 @@ from django.urls import reverse
 import datetime
 from catalog.mail import *
 from django.contrib.auth.models import User
+import os
 
 #Resident 
 
@@ -54,7 +55,11 @@ class Supplier(models.Model):
 
 
 # Produit
-
+def content_file_name(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s_%s.%s" % ('product_picture',instance.prod_date_create, ext)
+    return os.path.join('img/product', filename)
+    
 class Product(models.Model):
     prod_name = models.CharField(max_length=100, verbose_name="Nom du produit")
     prod_stock = models.PositiveIntegerField(verbose_name="Quantité en stock", default='0')
@@ -65,7 +70,7 @@ class Product(models.Model):
     prod_ref_out = models.CharField(max_length=100, verbose_name="Référence externe", blank=True) 
     prod_date_create = models.DateTimeField(auto_now_add=True, verbose_name="Date d'ajout", blank=True)
     prod_date_update = models.DateTimeField(auto_now=True, verbose_name="Date de modification", blank=True)
-    prod_img = models.ImageField(upload_to='img/product', default='img/product/default_product.png', verbose_name="Image du produit", blank=True)
+    prod_img = models.ImageField(upload_to=content_file_name, default='img/product/default_product.png', verbose_name="Image du produit", blank=True)
    
     class Meta:
         verbose_name = "Produit"

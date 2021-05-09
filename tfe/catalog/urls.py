@@ -13,8 +13,12 @@ urlpatterns = [
     path('product/<int:pk>/delete/', login_required(views.ProductDelete.as_view()), name='product-delete'),
     path('product/<int:pk>/restock/', login_required(views.ProductRestock), name='product-restock'),
     path('product/shop/', login_required(views.ProductListShop), name='product-shop'),
+    #Gestion panier
     path('product/addtobasket/', login_required(views.AddBasket), name='add-basket'),
+    path('product/<int:pk>/addone/', login_required(views.ProductAddOne), name='product-add-one'),
+    path('product/<int:pk>/remove/', login_required(views.ProductRemoveOne), name='product-remove-one'),
     path('basket/', login_required(views.BasketListView), name='basket'),
+    path('basket/delete', login_required(views.BasketDelete), name='basket-delete'),
     #Gestion Commande
     path('order/', login_required(views.OrderListView.as_view()), name='orders'),
     path('order/<int:pk>', views.OrderDetailView.as_view(), name='order-detail'),

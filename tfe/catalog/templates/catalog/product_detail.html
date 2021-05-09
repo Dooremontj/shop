@@ -6,9 +6,10 @@
          data-keyboard="false" data-dismiss="modal">
 	<div class="modal-dialog modal-dialog-centered">
 		<div class="modal-content">
+		<h1 style="text-align:center;">{{ product.prod_name }}</h1>
 			<div class="modal-header">
-			<img width="100" height="100" src="{{ product.prod_img.url }} " alt="{{ product.prod_name }}" class="img-fluid img-thumbnail">
-			<h1>{{ product.prod_name }}</h1>
+			<img style="margin-left:auto; margin-right:auto;" width="300" height="300" src="{{ product.prod_img.url }} " alt="{{ product.prod_name }}" class="img-fluid img-thumbnail">
+			
 				</div>
 				 <div class="modal-body">
 					<p>

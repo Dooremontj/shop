@@ -38,16 +38,7 @@ def ProductListShop(request):
     products = Product.objects.all()
     return render(request,'catalog/product_list_shop.html', {'product_list':products})
 
-def AddBasket(request):
-    if request.method == 'POST':
-        productselected = get_object_or_404(Product, pk=request.POST.get('product'))
-        instance = Basket(product=productselected , qty=request.POST.get('qty') , user_basket=request.user)
-        instance.save()
-    return HttpResponseRedirect(reverse('product-shop') )
-    
-def BasketListView(request):
-    product_list = Basket.objects.filter(user_basket=request.user)
-    return render(request,'catalog/basket.html', {'product_list':product_list})
+
     
 def ProductCreate(request):
     if request.method == 'POST':
@@ -109,6 +100,48 @@ def ProductRestock(request, pk):
         form = RestockProductForm(initial={'qty_in': min,})
 
     return render(request, 'catalog/restock_product_form.html', {'form': form, 'product':instance})
+    
+    
+################################################################################################
+#Basket
+################################################################################################
+
+def AddBasket(request):
+    if request.method == 'POST':
+        productselected = get_object_or_404(Product, pk=request.POST.get('product'))
+        instance = Basket(product=productselected , qty=request.POST.get('qty') , user_basket=request.user)
+        instance.save()
+    return HttpResponseRedirect(reverse('product-shop') )
+    
+def BasketListView(request):
+    product_list = Basket.objects.filter(user_basket=request.user)
+    return render(request,'catalog/basket.html', {'product_list':product_list})
+    
+def BasketDelete(request):
+    product_list = Basket.objects.filter(user_basket=request.user)
+    for p in product_list :
+        p.delete()
+    return HttpResponseRedirect(reverse('basket') )
+
+def ProductAddOne(request, pk):
+    instance=get_object_or_404(Basket, pk = pk)
+
+    if request.method == 'POST':
+            instance.qty += 1
+            instance.save()
+    return HttpResponseRedirect(reverse('basket') )
+
+    
+def ProductRemoveOne(request, pk):
+    instance=get_object_or_404(Basket, pk = pk)
+
+    if request.method == 'POST':
+        if instance.qty - 1 > 0 :
+            instance.qty -= 1
+            instance.save()
+        elif instance.qty - 1 == 0:
+            instance.delete()
+    return HttpResponseRedirect(reverse('basket') )
     
 ################################################################################################
 #suppliers
