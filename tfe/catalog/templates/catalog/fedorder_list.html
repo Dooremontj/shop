@@ -1,34 +1,46 @@
 {% extends "index.html" %}
 {% load static %} 
-{% block title %}Liste des commandes{% endblock %}
+{% load auth_extras %}
+{% block title %}Liste des commandes du personnel{% endblock %}
 
 {% block content %}
-    <a id="btnCreate" class="btn btn-dark" href="{% url 'order-create' %} ">+ Ajouter une commande</a>
-  {% if order_list %}
-  <table class="datatable table table-striped" id="OrdersTable" >
+  {% if fedorder_list %}
+  <table class="datatable table table-striped" id="FedOrdersTable" >
 		<thead>
 			<tr>
 				<th scope="col">Titre</th>
 				<th scope="col">Date</th>
 				<th scope="col">Personne</th>
+				<th scope="col">Satus</th>
+				{% if request.user|has_group:"Shop Members" %}
 				<th scope="col"></th>
-<!-- 				<th scope="col">Editer</th>
-				<th scope="col">Supprimer</th> -->
+				<th scope="col"></th>
+				{% endif %} 
 			</tr>
 		</thead>
 		<tbody id="myTable">
-    {% for order in order_list %}
+    {% for order in fedorder_list %}
 	<tr >
 				<td scope="row"><a href=# onclick="getOrderDetail({{ order.id }})">{{ order.title }}</a></td>
 				<td>{{ order.date }}</td>
 				<td>{{ order.order_user }}</td>
+				<td>{{ order.status }}</td>
+				{% if request.user|has_group:"Shop Members" %}
 				<td ><a href=# onclick="getConfirmDeleteModal({{ order.id }})" class="fa fa-pencil" ><img src="/static/media/icon/delete.png " alt="{{ order.title }}"></a></td>
+				<td ><a {% if order.status == "OPEN" %}href="{% url 'fed-order-closed' order.id %}" {% endif %} class="fa fa-pencil" >
+				{% if order.status == "OPEN" %}
+				<img src="/static/media/icon/open.png " alt="{{ order.title }}">
+				{% else %}
+				<img src="/static/media/icon/close.png " alt="{{ order.title }}">
+				{% endif %} 
+				</a></td>
+				{% endif %} 
 			</tr>
     {% endfor %}
    		</tbody>
 	</table>
   {% else %}
-    <p>There are no orders in the shop.</p>
+    <p>Il n'y a pas de commande.</p>
   {% endif %} 
     <div id="addModal"></div>
   {% endblock %}  
@@ -38,19 +50,15 @@
 
 <script>
 $(document).ready(function() {
-    $('#OrdersTable').DataTable({
-        "order": [[ 1, "desc" ]]
-    } );
+    $('#FedOrdersTable').DataTable();
 } );
 
 function getConfirmDeleteModal(pk) {
-var url ="{% url 'order-delete' 0 %}".replace('0', pk);
-var products;
+var url ="{% url 'fed-order-delete' 0 %}".replace('0', pk);
   $.ajax({
        type: "GET",
        url: url,
        success: function(data) {
-		   products += data;
 		   document.getElementById("addModal").innerHTML = data;
 		   $('#modalDelete').modal('show');
        }
@@ -58,17 +66,16 @@ var products;
 }
 
 function getOrderDetail(pk) {
-var url ="{% url 'order-detail' 0 %}".replace('0', pk);
-var products;
+var url ="{% url 'fed-order-detail' 0 %}".replace('0', pk);
   $.ajax({
        type: "GET",
        url: url,
        success: function(data) {
-		   products += data;
 		   document.getElementById("addModal").innerHTML = data;
 		   $('#modalProdDetail').modal('show');
        }
      });
 }
+
 </script>
 {% endblock %}

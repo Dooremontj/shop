@@ -26,7 +26,7 @@
 								<!-- <td scope="row" >
 									<a href="{{ product.get_absolute_url }}">{{ product.prod_name }}</a>
 								</td> -->
-								<td scope="row" ><a onclick="getProductDetail({{ product.id }})" class="fa fa-pencil">{{ product.prod_name }}</a></td>
+								<td scope="row" ><a href=# onclick="getProductDetail({{ product.id }})" class="fa fa-pencil">{{ product.prod_name }}</a></td>
 								<td >{{product.prod_stock}}</td>
 								<td ><a href="{% url 'product-update' product.id %} "><img src="/static/media/icon/edit.png " alt="{{ product.prod_name }}"></a></td>
 

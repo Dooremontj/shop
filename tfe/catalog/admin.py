@@ -1,5 +1,5 @@
 from django.contrib import admin
-from catalog.models import Supplier, Product, Order, OrderItem, Resident, Basket
+from catalog.models import Supplier, Product, Order, OrderItem, Resident, Basket, FedOrder, FedOrderItem
 from catalog.forms import *
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
@@ -52,6 +52,14 @@ class OrderAdmin(admin.ModelAdmin):
 class OrderItemAdmin(admin.ModelAdmin):
     model = OrderItem
     form = OrderItemForm
+
+@admin.register(FedOrderItem)
+class FedOrderItemAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(FedOrder)
+class FedOrderAdmin(admin.ModelAdmin):
+    pass
 
 # @admin.register(Resident)
 

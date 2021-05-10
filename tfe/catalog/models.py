@@ -81,7 +81,7 @@ class Product(models.Model):
     
     def get_absolute_url(self):
         return reverse('product-detail', args=[str(self.id)])
-
+    
 
 
 # Commande Resident
@@ -97,10 +97,9 @@ class Order (models.Model):
         ordering = ['-date']
 
     def __str__(self):
-        return self.title if self.title else 'New Order'
+        return self.title
         
     def get_absolute_url(self):
-       """Cette fonction est requise pas Django, lorsque vous souhaitez détailler le contenu d'un objet."""
        return reverse('order-detail', args=[str(self.id)])
 
     def get_edit_url(self):
@@ -135,12 +134,49 @@ def delete_order_item(sender, instance, **kwargs):
     product.prod_stock += instance.qty
     product.save()
     instance.order.save()
+    
+STATUS_CHOICE = (
+    ("OPEN","OPEN"),
+	("CLOSED","CLOSED"),
+)
 
+# Commande Personnel
+class FedOrder (models.Model):
+    date = models.DateTimeField(default=datetime.datetime.now)
+    title = models.CharField(blank=True, max_length=150)
+    timestamp = models.DateField(auto_now_add=True)
+    order_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    status = models.CharField(max_length = 20,
+		choices = STATUS_CHOICE,
+		default = 'OPEN', verbose_name="Status de la commande"
+		)
 
+    class Meta:
+        verbose_name = "Commande - membre du personnel"
+        ordering = ['date','status']
+
+    def __str__(self):
+        return self.title
+        
+    def get_absolute_url(self):
+       return reverse('fed-order-detail', args=[str(self.id)])
+
+class FedOrderItem(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    order = models.ForeignKey(FedOrder, on_delete=models.CASCADE)
+    qty = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        verbose_name = "ligne de commande - membre du personnel"
+        
+    def __str__(self):
+        return f'{self.product.prod_name}'
+        
 class Basket(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     qty = models.PositiveIntegerField(default=1)
     user_basket = models.ForeignKey(User, on_delete=models.CASCADE)
+    error = models.CharField(max_length=200, null = True)
     
     class Meta:
         verbose_name = "ligne de panier"

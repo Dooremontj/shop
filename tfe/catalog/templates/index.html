@@ -27,12 +27,9 @@
 					<li class="nav-item">
 						<a class="nav-link active" aria-current="page" href="{% url 'index' %}">Accueil</a>
 					</li>
-					<li>
-						<a class="nav-link" href="{% url 'products' %}">Produits</a>
-					</li>	
 					{% if request.user|has_group:"Shop Members" %}
 					<li>
-						<a class="nav-link" href="{% url 'orders' %}">Shop</a>
+						<a class="nav-link" href="{% url 'products' %}">Produits</a>
 					</li>
 					<li>
 						<a class="nav-link" href="{% url 'suppliers' %}">Fournisseurs</a>
@@ -41,7 +38,17 @@
 						<a class="nav-link" href="{% url 'residents' %}">Residents</a>
 					</li>
 					<li>
+						<a class="nav-link" href="{% url 'orders' %}">Shop</a>
+					</li>
+					<li>
+						<a class="nav-link" href="{% url 'fed-orders' %}">Commande du personnel</a>
+					</li>
+					{% else %}
+					<li>
 						<a class="nav-link" href="{% url 'product-shop' %}">Fed Shop</a>
+					</li>
+					<li>
+						<a class="nav-link" href="{% url 'my-fed-orders' %}">Mes Commandes</a>
 					</li>
 					<li>
 						<a class="nav-link" href="{% url 'basket' %}">Panier</a>

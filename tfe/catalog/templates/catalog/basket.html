@@ -3,9 +3,16 @@
 {% load auth_extras %}
 {% block title %}Liste des produits{% endblock %}
 {% block content %}
-<br><br>
-	<td><a style="float: right;" href="{%url 'basket-delete' %}" class="fa fa-pencil" ><img src="/static/media/icon/delete.png " alt="Delete"></a></td>
+
   {% if product_list %}
+  	<td>
+	<a style="float: left;" href="{%url 'basket-delete' %}" class="fa fa-pencil" >
+	<img src="/static/media/icon/delete.png " alt="Delete">
+	</a>
+	</td>
+		<td><a style="float: right;" href="{%url 'basket-convert' %}" class="fa fa-pencil" >
+		<img src="/static/media/icon/valid.png " alt="Delete">
+		</a></td>
 <table class="datatable table table-striped" id="Basket" >
 	<thead>
 		<tr>
@@ -22,18 +29,19 @@
 				</td>
 				<td scope="row" >
 					<a href=# onclick="getProductDetail({{ product.product.id }})" class="fa fa-pencil">{{ product.product.prod_name }}</a>
+					<p {% if product.error == null %} hidden {% endif %} class="errorform"> {{ product.error }} </p>
 				</td>
 				<td>
-				<form style="display: inline-block;" action="{% url 'product-remove-one' product.id %}" method="post">
+				<form class="btnaddandremove" action="{% url 'product-remove-one' product.id %}" method="post">
 				{% csrf_token %}
 				<input class="btn btn-danger" type="submit" value="-" /> 
-				</form> {{ product.qty }} <form style="display: inline-block;" action="{% url 'product-add-one' product.id %}" method="post">{% csrf_token %}<input class="btn btn-success" type="submit" value="+" /></form></td>
+				</form> {{ product.qty }} <form class="btnaddandremove" action="{% url 'product-add-one' product.id %}" method="post">{% csrf_token %}<input class="btn btn-success" type="submit" value="+" /></form></td>
 		</tr>
   {% endfor %}
 	</tbody>
 </table>
   {% else %}
-<p>There are no products in your basket.</p>
+<p>Votre panier est vide.</p>
   {% endif %}
   <div id="addModal"></div>
 {% endblock %}  

@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from catalog.models import Product, Supplier, Order, OrderItem, Resident, Basket
+from catalog.models import Product, Supplier, Order, OrderItem, Resident, Basket, FedOrder, FedOrderItem
 from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -17,6 +17,7 @@ from django.forms.utils import ErrorList
 from catalog.mail import *
 from django.core import serializers
 from django.contrib import messages
+import datetime
 
 
 def index(request):
@@ -29,7 +30,6 @@ def index(request):
 
 class ProductListView(generic.ListView):
     model = Product
-    #paginate_by = 10
     
 class ProductDetailView(LoginRequiredMixin, generic.DetailView):
     model = Product
@@ -39,7 +39,6 @@ def ProductListShop(request):
     return render(request,'catalog/product_list_shop.html', {'product_list':products})
 
 
-    
 def ProductCreate(request):
     if request.method == 'POST':
         form = ProductCreateForm(request.POST, request.FILES)
@@ -55,7 +54,18 @@ def ProductCreate(request):
 def ProductUpdate(request, pk):
     instance = get_object_or_404(Product, pk=pk)
     form = ProductUpdateForm(request.POST or None, instance=instance)
+    can_save = False
+    product_list = Product.objects.exclude(pk=instance.pk)
+    oldObject = get_object_or_404(Product, pk=pk)
     if form.is_valid():
+        if oldObject.prod_ref_in != form.cleaned_data['prod_ref_in']:
+            if product_list.filter(prod_ref_in=form.cleaned_data.get('prod_ref_in')).exists():
+                form.add_error('prod_ref_in','La référence interne existe déja')
+                return render(request, 'catalog/product_form.html', {'form': form}) 
+        if oldObject.prod_ref_out != form.cleaned_data['prod_ref_out'] or oldObject.prod_supplier != form.cleaned_data['prod_supplier']:
+            if product_list.filter(prod_supplier=form.cleaned_data.get('prod_supplier'),prod_ref_out=form.cleaned_data.get('prod_ref_out')).exists():
+                form.add_error('prod_ref_out','La référence externe existe déja')
+                return render(request, 'catalog/product_form.html', {'form': form}) 
         form.save()
         return HttpResponseRedirect(reverse('products') )
     return render(request, 'catalog/product_form.html', {'form': form}) 
@@ -122,6 +132,27 @@ def BasketDelete(request):
     for p in product_list :
         p.delete()
     return HttpResponseRedirect(reverse('basket') )
+    
+def BasketConvert(request):
+    product = Product.objects.all()
+    order_list = Basket.objects.filter(user_basket=request.user)
+    can_save = True
+    for p in order_list :
+        product = get_object_or_404(Product, pk=p.product.pk)
+        if p.qty >= product.prod_stock:
+            p.error = "Stock insuffisant - Stock restant :"+ str(product.prod_stock)
+            p.save()
+            can_save = False
+    if can_save:
+        id = FedOrder.objects.latest('id')
+        title = "AMC_Fed_"+datetime.datetime.now().strftime ("%d%m%Y")+"_"+str((id.id+1))
+        instance_order = FedOrder(order_user=request.user,title=title)
+        instance_order.save()
+        for p in order_list :
+            instance_item = FedOrderItem(product=p.product,order=instance_order,qty=p.qty)
+            instance_item.save()
+            p.delete()
+    return HttpResponseRedirect(reverse('basket') )
 
 def ProductAddOne(request, pk):
     instance=get_object_or_404(Basket, pk = pk)
@@ -143,6 +174,39 @@ def ProductRemoveOne(request, pk):
             instance.delete()
     return HttpResponseRedirect(reverse('basket') )
     
+################################################################################################
+#Commande Personnel
+################################################################################################
+
+class FedOrderListView(generic.ListView):
+    model = FedOrder
+
+class FedOrderDelete(DeleteView):
+    model = FedOrder
+    success_url = reverse_lazy('fed-orders')
+    
+def MyFedOrderListView(request):
+    fedorder_list = FedOrder.objects.filter(order_user=request.user)
+    return render(request, 'catalog/fedorder_list.html', {
+            'fedorder_list': fedorder_list,
+    })
+
+class FedOrderDetailView(LoginRequiredMixin, generic.DetailView):
+    model = FedOrder
+
+def FedOrderClose(request, pk):
+    instance = get_object_or_404(FedOrder, pk=pk)
+    instance.status = "CLOSED"
+    instance.save()
+    fedorderitem = FedOrderItem.objects.filter(order = instance)
+    for f in fedorderitem:
+        instance_product = get_object_or_404(Product, pk = f.product.pk)
+        instance_product.prod_stock = instance_product.prod_stock-f.qty
+        instance_product.save()
+    fedorder_list = FedOrder.objects.all()
+    return HttpResponseRedirect(reverse('fed-orders'))
+    
+   
 ################################################################################################
 #suppliers
 ################################################################################################

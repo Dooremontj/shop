@@ -33,11 +33,30 @@ table{
 	display : inline-block;
 }
 
+.DetailOrderModal{
+	margin-left:20px;
+	margin-top:20px
+}
+
+.btnaddandremove{
+	display: inline-block;
+}
+.centeredText{
+	text-align : center;
+	margin : auto;
+}
+
 .errorlist {
 	color: red;
     font-size: small;
     display: inline;
     list-style-type: none;
+}
+
+.errorform {
+	color: red;
+	font-size: small;
+    font-size: small;
 }
 .errorlist li {
 	color: red;
@@ -72,4 +91,8 @@ table{
     line-height: 1.5;
     border-radius: .25rem;
     transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+#btnCreate{
+		margin-bottom : 10px;
 }

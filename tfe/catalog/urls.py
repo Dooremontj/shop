@@ -19,6 +19,13 @@ urlpatterns = [
     path('product/<int:pk>/remove/', login_required(views.ProductRemoveOne), name='product-remove-one'),
     path('basket/', login_required(views.BasketListView), name='basket'),
     path('basket/delete', login_required(views.BasketDelete), name='basket-delete'),
+    path('basket/convert', login_required(views.BasketConvert), name='basket-convert'),
+    #Gestion commande du personnel
+    path('fed-orders/', login_required(views.FedOrderListView.as_view()), name='fed-orders'),
+    path('fed-order/<int:pk>/delete/', views.FedOrderDelete.as_view(), name='fed-order-delete'),
+    path('fed-order/<int:pk>', views.FedOrderDetailView.as_view(), name='fed-order-detail'),
+    path('my-fed-orders/', login_required(views.MyFedOrderListView), name='my-fed-orders'),
+    path('my-fed-orders/<int:pk>/close', login_required(views.FedOrderClose), name='fed-order-closed'),
     #Gestion Commande
     path('order/', login_required(views.OrderListView.as_view()), name='orders'),
     path('order/<int:pk>', views.OrderDetailView.as_view(), name='order-detail'),

@@ -3,9 +3,7 @@
 {% load auth_extras %}
 {% block title %}Liste des produits{% endblock %}
 {% block content %}
-	<br>
-
-<a class="btn btn-dark" href="{% url 'resident-create' %} ">+ Ajouter un résident</a>
+<a id="btnCreate" class="btn btn-dark" href="{% url 'resident-create' %} ">+ Ajouter un résident</a>
   {% if resident_list %}
   	<table class="datatable table table-striped" id="ResidentTable" >
 		<thead>

@@ -3,10 +3,9 @@
 {% load auth_extras %}
 {% block title %}Liste des produits{% endblock %}
 {% block content %}
-	<br>
-
-<a class="btn btn-dark" href="{% url 'product-create' %} ">+ Ajouter un produit</a>
+<a id="btnCreate" class="btn btn-dark" href="{% url 'product-create' %} ">+ Ajouter un produit</a>	
   {% if product_list %}
+  <br>
   	<table class="datatable table table-striped" id="example" >
 		<thead>
 			<tr>
