@@ -1,0 +1,36 @@
+
+{% load static %}
+
+{% block content %}
+<div class="modal fade" id="modalFedOrderUpdate" tabindex="-1" role="dialog"
+        aria-labelledby="modalFedOrderUpdate" aria-hidden="true"
+         data-keyboard="false" data-dismiss="modal">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+  <h3 class="centeredText">{{ order.title }}</h3>
+</div>
+  <p class="centeredText"><strong>date : </strong>{{ order.date }}</p> 
+  <div class="DetailOrderModal">
+    <h4>Produits :</h4>
+
+    {% for orderitem in order.fedorderitem_set.all %}
+      <div>
+	  <div id="orderdetail"><img width="100" height="100" src="{{ orderitem.product.prod_img.url }}" alt="{{ order.product.prod_name }}" class="img-fluid img-thumbnail"></div>
+      <div id="orderdetail"><div>produit : {{ orderitem.product.prod_name }}</div>
+	  <div>
+	  <form action="{% url 'fed-orderitem-update' order.id %}" method="POST">
+	  {% csrf_token %}
+	  <input onchange="UpdateQty({{ orderitem.id }})" type="number" name="qty" id="qty{{ orderitem.id }}" maxlength="100" class="form-control" value="{{ orderitem.qty }}"> 
+	  </form>
+	  </div></div></div>
+
+   {% endfor %}
+   <br>
+	<a id="btnCloseOrder" class="btn btn-dark" {% if order.status == "OPEN" %}href="{% url 'fed-order-closed' order.id %}" {% endif %}>Clore la commande</a>	
+			</div>
+		</div>
+	</div>
+
+
+{% endblock %}

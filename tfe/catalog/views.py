@@ -18,7 +18,7 @@ from catalog.mail import *
 from django.core import serializers
 from django.contrib import messages
 import datetime
-
+from django.contrib.auth.decorators import permission_required
 
 def index(request):
 	return render(request, 'index.html')
@@ -194,6 +194,7 @@ def MyFedOrderListView(request):
 class FedOrderDetailView(LoginRequiredMixin, generic.DetailView):
     model = FedOrder
 
+@permission_required('catalog.can_close_order')
 def FedOrderClose(request, pk):
     instance = get_object_or_404(FedOrder, pk=pk)
     instance.status = "CLOSED"
@@ -205,7 +206,20 @@ def FedOrderClose(request, pk):
         instance_product.save()
     fedorder_list = FedOrder.objects.all()
     return HttpResponseRedirect(reverse('fed-orders'))
+
+def FedOrderUpdateView(request, pk):
+    instance = get_object_or_404(FedOrder, pk=pk)
+    return render(request, 'catalog/fedorder_update.html', {
+            'order': instance,
+    })
     
+def FedOrderItemUpdateView(request,pk):
+    instance = get_object_or_404(FedOrderItem, pk=pk)
+    instance.qty = request.POST.get('qty')
+    instance.save()
+    return render(request, 'catalog/fedorder_update.html', {
+            'fedorderitem': instance,
+    })
    
 ################################################################################################
 #suppliers

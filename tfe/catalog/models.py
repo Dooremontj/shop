@@ -154,7 +154,8 @@ class FedOrder (models.Model):
     class Meta:
         verbose_name = "Commande - membre du personnel"
         ordering = ['date','status']
-
+        permissions = (("can_close_order", "Fermer la commande"),)
+        
     def __str__(self):
         return self.title
         

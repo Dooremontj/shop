@@ -26,8 +26,9 @@
 				<td>{{ order.order_user }}</td>
 				<td>{{ order.status }}</td>
 				{% if request.user|has_group:"Shop Members" %}
-				<td ><a href=# onclick="getConfirmDeleteModal({{ order.id }})" class="fa fa-pencil" ><img src="/static/media/icon/delete.png " alt="{{ order.title }}"></a></td>
-				<td ><a {% if order.status == "OPEN" %}href="{% url 'fed-order-closed' order.id %}" {% endif %} class="fa fa-pencil" >
+				<td ><a href=# onclick="getConfirmDeleteModal({{ order.id }})" class="fa fa-pencil" ><img src="/static/media/icon/delete.png " alt="{{ order.title }}"></a>
+				</td>
+				<td ><a {% if order.status == "OPEN" %}href=# onclick="getOrderUpdate({{ order.id }})" {% endif %} class="fa fa-pencil" >
 				{% if order.status == "OPEN" %}
 				<img src="/static/media/icon/open.png " alt="{{ order.title }}">
 				{% else %}
@@ -73,6 +74,34 @@ var url ="{% url 'fed-order-detail' 0 %}".replace('0', pk);
        success: function(data) {
 		   document.getElementById("addModal").innerHTML = data;
 		   $('#modalProdDetail').modal('show');
+       }
+     });
+}
+
+function getOrderUpdate(pk) {
+var url ="{% url 'fed-order-update' 0 %}".replace('0', pk);
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalFedOrderUpdate').modal('show');
+       }
+     });
+}
+
+function UpdateQty(pk,qty) {
+var url ="{% url 'fed-orderitem-update' 0 %}".replace('0', pk);
+  $.ajax({
+       type: "POST",
+       url: url,
+	   data:
+            {
+                qty:$("#qty"+pk).val(),
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+            },
+       success: function(data) {
+			
        }
      });
 }
