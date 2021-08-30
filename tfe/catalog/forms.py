@@ -117,7 +117,7 @@ class OrderItemForm(forms.ModelForm):
         else :
             prod = self.cleaned_data['product']
             product_selected = Product.objects.get(pk=prod.id)
-            if self.cleaned_data.get('qty') is None :
+            if self.cleaned_data.get('qty') is None or self.cleaned_data.get('qty') == 0 :
                 errors['qty'] = _('pas de quantité')
             else : 
                 if product_selected.prod_stock-self.cleaned_data['qty'] < 0:
@@ -144,7 +144,21 @@ class OrderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(OrderForm,self).__init__(*args, **kwargs)
         for visible in self.visible_fields():
-            visible.field.widget.attrs['class'] = 'form-control' 
+            visible.field.widget.attrs['class'] = 'form-control'
+    
+    def clean(self):
+        errors={}
+        residentselected = self.cleaned_data.get('order_user')      
+        resident = Resident.objects.get(pk=residentselected.id)
+        family = Resident.objects.filter(badge=resident.badge).order_by('-age')
+        familynumber = family.count()
+        limit = LimitFamily.objects.get(compo_family=str(familynumber))
+        if self.cleaned_data.get('points') > limit.point_by_week :
+            errors['points'] = _(str(self.cleaned_data.get('points')))
+        if errors:
+            raise ValidationError(errors)
+        return self.cleaned_data
+
             
 class ResidentForm(forms.ModelForm):
     

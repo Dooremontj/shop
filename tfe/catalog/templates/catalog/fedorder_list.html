@@ -51,7 +51,9 @@
 
 <script>
 $(document).ready(function() {
-    $('#FedOrdersTable').DataTable();
+    $('#FedOrdersTable').DataTable({
+        "order": [[ 3, "desc" ]]
+    } );
 } );
 
 function getConfirmDeleteModal(pk) {

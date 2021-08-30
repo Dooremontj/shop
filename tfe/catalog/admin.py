@@ -1,5 +1,5 @@
 from django.contrib import admin
-from catalog.models import Supplier, Product, Order, OrderItem, Resident, Basket, FedOrder, FedOrderItem
+from catalog.models import Supplier, Product, Order, OrderItem, Resident, Basket, FedOrder, FedOrderItem, LimitFamily
 from catalog.forms import *
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
@@ -9,15 +9,9 @@ class ResidentResource(resources.ModelResource):
 
     class meta:
         model = Resident
-        widgets = {
-                'birthdate': {'format': '%d/%m/%Y'},
-                'datein': {'format': '%d/%m/%Y'},
-                }
-        
         
 class ResidentAdmin(ImportExportModelAdmin):
     pass
-    #resource_class = ResidentResource
 
 admin.site.register(Resident, ResidentAdmin)
 
@@ -59,6 +53,10 @@ class FedOrderItemAdmin(admin.ModelAdmin):
 
 @admin.register(FedOrder)
 class FedOrderAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(LimitFamily)
+class LimitFamilyAdmin(admin.ModelAdmin):
     pass
 
 # @admin.register(Resident)

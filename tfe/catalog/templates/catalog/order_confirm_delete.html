@@ -7,7 +7,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 
-				<p>Êtes-vous sûr de voulour supprimer: {{ order }}?</p>
+				<p>Êtes-vous sûr de vouloir supprimer: {{ order }}?</p>
 
 				<form action="{% url 'order-delete' order.id %}" method="POST">
   {% csrf_token %}

@@ -1,0 +1,128 @@
+{% extends "index.html" %}
+{% load static %} 
+{% load auth_extras %}
+{% block title %}Liste des produits{% endblock %}
+{% block content %}
+<br>
+  {% if user_basket %}
+  
+  <div class="form-group mb-2">
+	<select id='selResident'  class="form-control form-control-lg">
+	{% for resident in user_basket %}
+		<option value="{{resident.id}}">{{resident.badge}}({{resident.family_group}}) | {{resident.firstname}} {{resident.name}}</option>
+	{% endfor %}
+	</select>
+</div>
+<input class="btn btn-success" type="button" onclick="getBasketResidentDetail()" value="Show Basket" />
+  {% endif %}
+  {% if product_list %}
+<table class="datatable table table-striped" id="ShopList" >
+	<thead>
+		<tr>
+			<th scope="col">Image</th>
+			<th scope="col">Produit</th>
+			<th scope="col">Stock</th>
+			<th scope="col">Quantité</th>
+			<th scope="col"/></th>
+		</tr>
+	</thead>
+	<tbody id="myTable">
+  {% for product in product_list %}
+		<tr>
+			<td scope="row w-25" >
+			<a href=# onclick="getProductDetail({{ product.id }})" class="fa fa-pencil">
+				<img width="100" height="100" src="{{ product.prod_img.url }} " alt="{{ product.prod_name }}" class="img-fluid img-thumbnail"></a>
+				</td>
+				<td scope="row" >
+					<a href=# onclick="getProductDetail({{ product.id }})" class="fa fa-pencil">{{ product.prod_name }}</a>
+				</td>
+				<td>{{product.prod_stock}}</td>
+				<form action="{% url 'add-basket-resident' product.id %}" method="post">
+				 {% csrf_token %}
+					<input type="hidden" name="user_basket" class="resident" value=""/>
+					<td><input type="hidden" name="product" id="product{{product.id}}" value="{{ product.id }}">
+					<input type="number" min="1" name="qty" id="qty{{product.id}}" value="1"></td>
+					<td><input class="btn btn-success" type="button" onclick="AddToBasket({{ product.id }})" value="+" /></td>
+				</form>
+		</tr>
+  {% endfor %}
+	</tbody>
+</table>
+  {% else %}
+<p>There are no products in the shop.</p>
+  {% endif %}
+  <div id="addModal"></div>
+{% endblock %}  
+{% block jscript %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" /> 
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+
+		<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+
+		<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+		
+<script>
+
+$(document).ready(function(){
+ 
+  // Initialize select2
+  $("#selResident").select2();
+
+  // Read selected option
+ 
+});
+
+$(document).ready(function() {
+    $('#ShopList').DataTable();
+} );
+
+$("#selResident").change(function() {
+    $(".resident").val($(this).val());
+}).change(); // trigger once if needed
+
+function getProductDetail(pk) {
+var url ="{% url 'product-detail' 0 %}".replace('0', pk);
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalProdDetail').modal('show');
+       }
+     });
+}
+
+function getBasketResidentDetail() {
+var user_basket = $(".resident").val();
+var url ="{% url 'basket-resident-detail' 0 %}".replace('0', user_basket);
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalProdDetail').modal('show');
+       }
+     });
+}
+
+function AddToBasket(pk) {
+var url ="{% url 'add-basket-resident' 0 %}".replace('0', pk);
+  $.ajax({
+       type: "POST",
+       url: url,
+	   data:
+            {
+                qty:$("#qty"+pk).val(),
+                product:$("#product"+pk).val(),
+                user_basket:$(".resident").val(),
+                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+            },
+       success: function(data) {
+			
+       }
+     });
+}
+
+</script>
+{% endblock %}

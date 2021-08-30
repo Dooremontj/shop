@@ -52,7 +52,23 @@ class Supplier(models.Model):
     def get_absolute_url(self):
         """Cette fonction est requise pas Django, lorsque vous souhaitez détailler le contenu d'un objet."""
         return reverse('supplier-detail', args=[str(self.id)])
+        
+        
+POINT = (
+    (0,0),
+    (1,1),
+    (2,2),
+	(3,3),
+	(4,4),
+	(5,5),
+	(10,10),
+	(15,15),
+)
 
+MAIN_CATEGORY = (
+    ('RESIDENT','RESIDENT'),
+    ('PERSONNEL','PERSONNEL'),
+)
 
 # Produit
 def content_file_name(instance, filename):
@@ -71,6 +87,15 @@ class Product(models.Model):
     prod_date_create = models.DateTimeField(auto_now_add=True, verbose_name="Date d'ajout", blank=True)
     prod_date_update = models.DateTimeField(auto_now=True, verbose_name="Date de modification", blank=True)
     prod_img = models.ImageField(upload_to=content_file_name, default='img/product/default_product.png', verbose_name="Image du produit", blank=True)
+    prod_limit = models.IntegerField(max_length = 20,
+		choices = POINT,
+		default = 0, verbose_name="point(s)"
+		)
+    prod_child = models.BooleanField(default=False, verbose_name="Réservé aux familles avec enfants")
+    prod_main_category = models.CharField(max_length = 20,
+		choices = MAIN_CATEGORY,
+		default = 'PERSONNEL', verbose_name="Catégorie"
+		)
    
     class Meta:
         verbose_name = "Produit"
@@ -83,14 +108,32 @@ class Product(models.Model):
         return reverse('product-detail', args=[str(self.id)])
     
 
-
-# Commande Resident
-
-class Order (models.Model):
+class GenericOrder (models.Model):
     date = models.DateTimeField(default=datetime.datetime.now)
     title = models.CharField(blank=True, max_length=150)
     timestamp = models.DateField(auto_now_add=True)
+    
+    class Meta:
+        abstract = True
+        
+    def __str__(self):
+        return self.title
+        
+class GenericOrderItem (models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
+    qty = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        abstract = True
+        verbose_name = "ligne de commande"
+        
+    def __str__(self):
+        return f'{self.product.prod_name}'
+# Commande Resident
+
+class Order (GenericOrder):
     order_user = models.ForeignKey(Resident, on_delete=models.CASCADE, null=True)
+    points = models.IntegerField(verbose_name="points", default='0')
 
     class Meta:
         verbose_name = "Commande"
@@ -101,22 +144,14 @@ class Order (models.Model):
         
     def get_absolute_url(self):
        return reverse('order-detail', args=[str(self.id)])
-
-    def get_edit_url(self):
-        return reverse('update_order', kwargs={'pk': self.id})
-
-    def get_delete_url(self):
-        return reverse('delete_order', kwargs={'pk': self.id})
         
 # @receiver(post_save, sender=Order)
 # def send_mail(sender, instance, **kwargs):
     # email_new_order(instance)
     
       
-class OrderItem(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    qty = models.PositiveIntegerField(default=1)
+class OrderItem(GenericOrderItem):
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, null=True)
 
     class Meta:
         verbose_name = "ligne de commande"
@@ -124,27 +159,67 @@ class OrderItem(models.Model):
     def __str__(self):
         return f'{self.product.prod_name}'
 
- #   def save(self,  *args, **kwargs):
-  #      super().save(*args, **kwargs)
-   #     self.order.save()
 
-@receiver(post_delete, sender=OrderItem)
-def delete_order_item(sender, instance, **kwargs):
-    product = instance.product
-    product.prod_stock += instance.qty
-    product.save()
-    instance.order.save()
+# @receiver(post_delete, sender=OrderItem)
+# def delete_order_item(sender, instance, **kwargs):
+    # product = instance.product
+    # product.prod_stock += instance.qty
+    # product.save()
+    # instance.order.save()
     
 STATUS_CHOICE = (
     ("OPEN","OPEN"),
+    ("PARTIEL","PARTIEL"),
 	("CLOSED","CLOSED"),
 )
 
+NUMBER_FAMILY = (
+    ("1","1"),
+    ("2","2"),
+	("3","3"),
+	("4","4"),
+	("5","5"),
+	("6","6"),
+	("7","7"),
+)
+
+POINT_BY_WEEK = (
+    (0,0),
+    (1,1),
+    (2,2),
+	(3,3),
+	(4,4),
+	(5,5),
+	(6,6),
+	(7,7),
+	(8,8),
+	(9,9),
+	(10,10),
+	(11,11),
+	(12,12),
+	(13,13),
+	(14,14),
+	(15,15),
+	(16,16),
+	(17,17),
+	(18,18),
+	(19,19),
+	(20,20),
+	(25,25),
+)
+
+class LimitFamily (models.Model):
+    compo_family = models.CharField(max_length = 20,
+		choices = NUMBER_FAMILY, verbose_name="Composition familiale"
+		)
+    point_by_week = models.IntegerField(max_length = 20,
+		choices = POINT_BY_WEEK, verbose_name="Limite par semaine"
+		)
+
+
+
 # Commande Personnel
-class FedOrder (models.Model):
-    date = models.DateTimeField(default=datetime.datetime.now)
-    title = models.CharField(blank=True, max_length=150)
-    timestamp = models.DateField(auto_now_add=True)
+class FedOrder (GenericOrder):
     order_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     status = models.CharField(max_length = 20,
 		choices = STATUS_CHOICE,
@@ -162,10 +237,8 @@ class FedOrder (models.Model):
     def get_absolute_url(self):
        return reverse('fed-order-detail', args=[str(self.id)])
 
-class FedOrderItem(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    order = models.ForeignKey(FedOrder, on_delete=models.CASCADE)
-    qty = models.PositiveIntegerField(default=1)
+class FedOrderItem(GenericOrderItem):
+    order = models.ForeignKey(FedOrder, on_delete=models.CASCADE, null=True)
 
     class Meta:
         verbose_name = "ligne de commande - membre du personnel"
@@ -173,14 +246,32 @@ class FedOrderItem(models.Model):
     def __str__(self):
         return f'{self.product.prod_name}'
         
-class Basket(models.Model):
+class GenericBasket(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     qty = models.PositiveIntegerField(default=1)
-    user_basket = models.ForeignKey(User, on_delete=models.CASCADE)
     error = models.CharField(max_length=200, null = True)
     
     class Meta:
+        abstract = True
         verbose_name = "ligne de panier"
+        
+    def __str__(self):
+        return f'{self.product.prod_name}'
+
+class Basket(GenericBasket):
+    user_basket = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    class Meta:
+        verbose_name = "ligne de panier membre du personnel"
+        
+    def __str__(self):
+        return f'{self.product.prod_name}'
+
+class BasketResident(GenericBasket):
+    user_basket =  models.ForeignKey(Resident, on_delete=models.CASCADE)
+    
+    class Meta:
+        verbose_name = "ligne de panier résident"
         
     def __str__(self):
         return f'{self.product.prod_name}'

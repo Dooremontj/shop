@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from catalog.models import Product, Supplier, Order, OrderItem, Resident, Basket, FedOrder, FedOrderItem
+from catalog.models import Product, Supplier, Order, OrderItem, Basket, BasketResident, Resident, FedOrder, FedOrderItem, LimitFamily
 from django.views import generic
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -31,11 +31,16 @@ def index(request):
 class ProductListView(generic.ListView):
     model = Product
     
+def ProductListResidentView(request):
+    user_basket = Resident.objects.all()
+    products = Product.objects.filter(prod_main_category='RESIDENT')
+    return render(request,'catalog/product_list_resident.html', {'product_list':products,'user_basket' : user_basket})
+    
 class ProductDetailView(LoginRequiredMixin, generic.DetailView):
     model = Product
     
 def ProductListShop(request):
-    products = Product.objects.all()
+    products = Product.objects.filter(prod_main_category='PERSONNEL')
     return render(request,'catalog/product_list_shop.html', {'product_list':products})
 
 
@@ -119,13 +124,42 @@ def ProductRestock(request, pk):
 def AddBasket(request):
     if request.method == 'POST':
         productselected = get_object_or_404(Product, pk=request.POST.get('product'))
-        instance = Basket(product=productselected , qty=request.POST.get('qty') , user_basket=request.user)
-        instance.save()
+        if Basket.objects.filter(product=productselected, user_basket=request.user).exists():
+            instancebasket = get_object_or_404(Basket, product=productselected, user_basket=request.user)
+            instancebasket.qty += int(request.POST.get('qty'))
+            instancebasket.save()
+        else:
+            instance = Basket(product=productselected , qty=request.POST.get('qty') , user_basket=request.user)
+            instance.save()
+    return HttpResponseRedirect(reverse('product-shop') )
+    
+def AddBasketResident(request,pk):
+    if request.method == 'POST':
+        productselected = get_object_or_404(Product, pk=pk)
+        residentselected =  get_object_or_404(Resident, pk=request.POST.get('user_basket'))
+        if BasketResident.objects.filter(product=productselected, user_basket=residentselected).exists():
+            instancebasket = get_object_or_404(BasketResident, product=productselected, user_basket=residentselected)
+            instancebasket.qty += int(request.POST.get('qty'))
+            instancebasket.save()
+        else:
+            instance = BasketResident(product=productselected , qty=request.POST.get('qty') , user_basket=residentselected)
+            instance.save()
     return HttpResponseRedirect(reverse('product-shop') )
     
 def BasketListView(request):
     product_list = Basket.objects.filter(user_basket=request.user)
     return render(request,'catalog/basket.html', {'product_list':product_list})
+    
+def BasketResidentListView(request,pk):
+    product_list = BasketResident.objects.filter(user_basket=pk)
+    points = 0
+    for p in product_list :
+        points += p.product.prod_limit
+    instance = get_object_or_404(Resident, pk=pk)
+    family = Resident.objects.filter(badge=instance.badge)
+    familynumber = family.count()
+    user_points = get_object_or_404(LimitFamily, compo_family=str(familynumber)).point_by_week
+    return render(request,'catalog/basket_resident_detail.html', {'product_list':product_list, 'points':points, 'user_points':user_points})
     
 def BasketDelete(request):
     product_list = Basket.objects.filter(user_basket=request.user)
@@ -298,6 +332,7 @@ def ResidentCreate(request):
 ################################################################################################   
     
 
+    
 class OrderListView(LoginRequiredMixin, generic.ListView):
     model = Order
     
@@ -319,15 +354,22 @@ class OrderItemCreate(CreateView):
         data = super(OrderItemCreate, self).get_context_data(**kwargs)
         if self.request.POST:
             data['orderlist'] = OrderItemFormSet(self.request.POST)
+            
         else:
             data['orderlist'] = OrderItemFormSet()
         return data
-
+    
     def form_valid(self, form):
         context = self.get_context_data(form=form)
         orderlist = context['orderlist']
+        # residentselected = context['form'].cleaned_data.get('order_user')      
+        # resident = get_object_or_404(Resident, pk=residentselected.pk)
+        # family = Resident.objects.filter(badge=resident.badge).order_by('-age')
+        # familynumber = family.count()
+        # limit = get_object_or_404(LimitFamily, compo_family=str(familynumber))
         can_save = True
         d = dict()
+        point = 0
         for f in orderlist:
             if f.is_valid():
                 if f.cleaned_data.get('product') is None :
@@ -338,6 +380,7 @@ class OrderItemCreate(CreateView):
                     can_save = False
                 else : 
                     prod = f.cleaned_data['product']
+                    point += prod.prod_limit
                     if prod.id in d :
                         qty = d.get(prod.id)
                         qty += f.cleaned_data['qty']
@@ -345,15 +388,17 @@ class OrderItemCreate(CreateView):
                     else:
                         qty = f.cleaned_data['qty']
                         d[prod.id] = qty
-        for key in d :
-            product = Product.objects.get(pk=key)
-            if product.prod_stock < d.get(key):
-                can_save = False
-                form.add_error(None,'Problème de quantitée pour le produit :'+ product.prod_name + ' Quantité restante : '+ str(product.prod_stock))
-                form.add_error(None,'Quantité restante : '+ str(product.prod_stock))
-                form.add_error(None,'Quantité demandée : '+ str(d.get(key)))
-                break
+
+        form.data = form.data.copy()
+        form.data['points'] = 50
+        orderlist.data = orderlist.data.copy()
+        orderlist.data['points'] = 50
+        # if point > limit.point_by_week : 
+            # form.add_error(None,'Limite de point dépasse de : '+str(point))
+            # can_save = False
+            # return super().form_invalid(form)
         if can_save and orderlist.is_valid():
+            
             response = super().form_valid(form)
             orderlist.instance = self.object
             orderlist.save()

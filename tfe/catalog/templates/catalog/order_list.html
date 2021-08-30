@@ -45,12 +45,10 @@ $(document).ready(function() {
 
 function getConfirmDeleteModal(pk) {
 var url ="{% url 'order-delete' 0 %}".replace('0', pk);
-var products;
   $.ajax({
        type: "GET",
        url: url,
        success: function(data) {
-		   products += data;
 		   document.getElementById("addModal").innerHTML = data;
 		   $('#modalDelete').modal('show');
        }

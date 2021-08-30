@@ -15,9 +15,11 @@ urlpatterns = [
     path('product/shop/', login_required(views.ProductListShop), name='product-shop'),
     #Gestion panier
     path('product/addtobasket/', login_required(views.AddBasket), name='add-basket'),
+    path('product/addtobasketresident/<int:pk>', login_required(views.AddBasketResident), name='add-basket-resident'),
     path('product/<int:pk>/addone/', login_required(views.ProductAddOne), name='product-add-one'),
     path('product/<int:pk>/remove/', login_required(views.ProductRemoveOne), name='product-remove-one'),
     path('basket/', login_required(views.BasketListView), name='basket'),
+    path('basketresident/<int:pk>', login_required(views.BasketResidentListView), name='basket-resident-detail'),
     path('basket/delete', login_required(views.BasketDelete), name='basket-delete'),
     path('basket/convert', login_required(views.BasketConvert), name='basket-convert'),
     #Gestion commande du personnel
@@ -29,7 +31,9 @@ urlpatterns = [
     path('my-fed-orders/<int:pk>/update', login_required(views.FedOrderUpdateView), name='fed-order-update'),
     path('fed-orderitem/<int:pk>/update/', login_required(views.FedOrderItemUpdateView), name='fed-orderitem-update'),
     #Gestion Commande
-    path('order/', login_required(views.OrderListView.as_view()), name='orders'),
+    # path('order/', login_required(views.OrderListView.as_view()), name='orders'),
+    # path('product/addtobasketresident/<int:pk>', login_required(views.AddBasketResident), name='add-basket-resident'),
+    path('order/', login_required(views.ProductListResidentView), name='orders'),
     path('order/<int:pk>', login_required(views.OrderDetailView.as_view()), name='order-detail'),
     path('order/create/', login_required(views.OrderItemCreate.as_view()), name='order-create'),
     path('order/<int:pk>/update/', login_required(views.OrderUpdate.as_view()), name='order-update'),

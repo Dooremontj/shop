@@ -7,12 +7,16 @@
 				{% block link %} 
 			<link rel="stylesheet"  type="text/css" href="{% static 'css/style.css'  %}"/>
 		{% endblock %}
+		
 		{% load bootstrap4 %}
 		{# Load CSS and JavaScript #}
 		{% bootstrap_css %}
+		
 		{% bootstrap_javascript jquery='full' %}
+	
+		{% block jscripts %}
+		 
 
-		{% block scripts %}
 		{% endblock %}
 		{% load auth_extras %}
 	</head>
@@ -28,6 +32,17 @@
 						<a class="nav-link active" aria-current="page" href="{% url 'index' %}">Accueil</a>
 					</li>
 					{% if request.user|has_group:"Shop Members" %}
+					<li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Données
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="{% url 'products' %}">Produits</a>
+          <a class="dropdown-item" href="{% url 'suppliers' %}">Fournisseurs</a>
+          <a class="dropdown-item" href="{% url 'residents' %}">Residents</a>
+        </div>
+      </li>
+<!--
 					<li>
 						<a class="nav-link" href="{% url 'products' %}">Produits</a>
 					</li>
@@ -36,12 +51,21 @@
 					</li>
 					<li>
 						<a class="nav-link" href="{% url 'residents' %}">Residents</a>
-					</li>
+					</li> -->
 					<li>
 						<a class="nav-link" href="{% url 'orders' %}">Shop</a>
 					</li>
 					<li>
 						<a class="nav-link" href="{% url 'fed-orders' %}">Commande du personnel</a>
+					</li>
+					<li>
+						<a class="nav-link" href="{% url 'product-shop' %}">Fed Shop</a>
+					</li>
+					<li>
+						<a class="nav-link" href="{% url 'my-fed-orders' %}">Mes Commandes</a>
+					</li>
+					<li>
+						<a class="nav-link" href="{% url 'basket' %}">Panier</a>
 					</li>
 					{% else %}
 					<li>
