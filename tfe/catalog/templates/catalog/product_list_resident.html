@@ -3,17 +3,21 @@
 {% load auth_extras %}
 {% block title %}Liste des produits{% endblock %}
 {% block content %}
-<br>
   {% if user_basket %}
   
-  <div class="form-group mb-2">
+  <div class="form-group mb-2" id="CartResident" >
+  <a  href='#' onclick="getBasketResidentDetail()" class="fa fa-pencil" >
+	<img src="/static/media/icon/cart.png" alt="Panier">
+	</a>
 	<select id='selResident'  class="form-control form-control-lg">
 	{% for resident in user_basket %}
 		<option value="{{resident.id}}">{{resident.badge}}({{resident.family_group}}) | {{resident.firstname}} {{resident.name}}</option>
 	{% endfor %}
 	</select>
+	<a class="btn btn-dark" id="Resident_detail_order_function" onclick="getResidentOrderDetail(1)">Historique commande</a>
+		<a class="btn btn-dark" id="Resident_detail_function" onclick="getResidentDetail(1)">Détail</a>
+
 </div>
-<input class="btn btn-success" type="button" onclick="getBasketResidentDetail()" value="Show Basket" />
   {% endif %}
   {% if product_list %}
 <table class="datatable table table-striped" id="ShopList" >
@@ -22,6 +26,7 @@
 			<th scope="col">Image</th>
 			<th scope="col">Produit</th>
 			<th scope="col">Stock</th>
+			<th scope="col">Point(s)</th>
 			<th scope="col">Quantité</th>
 			<th scope="col"/></th>
 		</tr>
@@ -37,6 +42,7 @@
 					<a href=# onclick="getProductDetail({{ product.id }})" class="fa fa-pencil">{{ product.prod_name }}</a>
 				</td>
 				<td>{{product.prod_stock}}</td>
+				<td>{{product.prod_limit}}</td>
 				<form action="{% url 'add-basket-resident' product.id %}" method="post">
 				 {% csrf_token %}
 					<input type="hidden" name="user_basket" class="resident" value=""/>
@@ -65,12 +71,7 @@
 <script>
 
 $(document).ready(function(){
- 
-  // Initialize select2
   $("#selResident").select2();
-
-  // Read selected option
- 
 });
 
 $(document).ready(function() {
@@ -79,6 +80,15 @@ $(document).ready(function() {
 
 $("#selResident").change(function() {
     $(".resident").val($(this).val());
+	var name = $("#selResident option:selected");
+	console.log(name[0].value)
+	var clickfun = document.getElementById("Resident_detail_function").getAttribute("onclick");
+	var getResidentDetail = clickfun.substring(0,clickfun.indexOf("(")); 
+	document.getElementById("Resident_detail_function").setAttribute("onclick",getResidentDetail+"("+name[0].value+")");
+	var clickfun = document.getElementById("Resident_detail_order_function").getAttribute("onclick");
+	var getResidentOrderDetail = clickfun.substring(0,clickfun.indexOf("(")); 
+	document.getElementById("Resident_detail_order_function").setAttribute("onclick",getResidentOrderDetail+"("+name[0].value+")");
+	
 }).change(); // trigger once if needed
 
 function getProductDetail(pk) {
@@ -124,5 +134,32 @@ var url ="{% url 'add-basket-resident' 0 %}".replace('0', pk);
      });
 }
 
+function getResidentDetail(pk) {
+var url ="{% url 'resident-detail-family' 0 %}".replace('0', pk);
+var products;
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   products += data;
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalResidentDetail').modal('show');
+       }
+     });
+}
+
+function getResidentOrderDetail(pk) {
+var url ="{% url 'resident-detail-order' 0 %}".replace('0', pk);
+var products;
+  $.ajax({
+       type: "GET",
+       url: url,
+       success: function(data) {
+		   products += data;
+		   document.getElementById("addModal").innerHTML = data;
+		   $('#modalResidentOrderDetail').modal('show');
+       }
+     });
+}
 </script>
 {% endblock %}

@@ -276,11 +276,20 @@ class BasketResident(GenericBasket):
     def __str__(self):
         return f'{self.product.prod_name}'
         
-# @receiver(post_save, sender=OrderItem)
-# def save_order_item(sender, instance, **kwargs):
-    # product = instance.product
-    # product.prod_stock -= instance.qty
-    # product.save()
+@receiver(post_save, sender=OrderItem)
+def save_order_item(sender, instance, **kwargs):
+    product = instance.product
+    product.prod_stock -= instance.qty
+    product.save()
     # if product.prod_stock <= product.prod_min:
         # email_warning_stock(product)
-    # instance.order.save()
+    instance.order.save()
+    
+@receiver(post_save, sender=FedOrderItem)
+def save_order_item(sender, instance, **kwargs):
+    product = instance.product
+    product.prod_stock -= instance.qty
+    product.save()
+    # if product.prod_stock <= product.prod_min:
+        # email_warning_stock(product)
+    instance.order.save()

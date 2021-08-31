@@ -90,6 +90,14 @@
     transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
 }
 
+.select2 select2-container select2-container--default select2-container--below {
+	width : 90%;
+}
+
+#CartResident{
+		display : inline-block;
+}
+
 #btnCreate{
 		margin-bottom : 10px;
 }

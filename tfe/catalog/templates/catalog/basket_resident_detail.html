@@ -9,7 +9,7 @@
 		
 		{% if product_list %}
   	<td>
-	<a style="text-align: center;" href="{%url 'basket-delete' %}" class="fa fa-pencil" >
+	<a style="text-align: center;" href="{%url 'basketresident-delete' resident.id %}" class="fa fa-pencil" >
 	<img src="/static/media/icon/delete.png " alt="Delete">
 	</a>
 	</td>
@@ -33,17 +33,17 @@
 					<p {% if product.error == null %} hidden {% endif %} class="errorform"> {{ product.error }} </p>
 				</td>
 				<td>
-				<form class="btnaddandremove" action="{% url 'product-remove-one' product.id %}" method="post">
+				<form class="btnaddandremove" action="{% url 'basketresident-remove-one' product.id %}" method="post">
 				{% csrf_token %}
 				<input class="btn btn-danger" type="submit" value="-" /> 
-				</form> {{ product.qty }} <form class="btnaddandremove" action="{% url 'product-add-one' product.id %}" method="post">{% csrf_token %}<input class="btn btn-success" type="submit" value="+" /></form></td>
+				</form> {{ product.qty }} <form class="btnaddandremove" action="{% url 'basketresident-add-one' product.id %}" method="post">{% csrf_token %}<input class="btn btn-success" type="submit" value="+" /></form></td>
 		</tr>
   {% endfor %}
 	</tbody>
 </table>
 <p> Total de points de la commande : {{ points }} </p>
 <p> Points résidents : {{ user_points }} </p>
-<td><a style="text-align: center;" href="{%url 'basket-convert' %}" class="fa fa-pencil" >
+<td><a style="text-align: center;" href="{%url 'basketresident-convert' resident.id %}" class="fa fa-pencil" >
 		<img src="/static/media/icon/valid.png " alt="Delete">
 		</a></td>
   {% else %}

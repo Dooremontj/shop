@@ -23,7 +23,6 @@ from django.contrib.auth.decorators import permission_required
 def index(request):
 	return render(request, 'index.html')
     
-    
 ################################################################################################
 #products
 ################################################################################################
@@ -159,13 +158,20 @@ def BasketResidentListView(request,pk):
     family = Resident.objects.filter(badge=instance.badge)
     familynumber = family.count()
     user_points = get_object_or_404(LimitFamily, compo_family=str(familynumber)).point_by_week
-    return render(request,'catalog/basket_resident_detail.html', {'product_list':product_list, 'points':points, 'user_points':user_points})
+    return render(request,'catalog/basket_resident_detail.html', {'product_list':product_list, 'points':points, 'user_points':user_points, 'resident':instance,})
     
 def BasketDelete(request):
     product_list = Basket.objects.filter(user_basket=request.user)
     for p in product_list :
         p.delete()
     return HttpResponseRedirect(reverse('basket') )
+
+def BasketResidentDelete(request,pk):
+    instance = get_object_or_404(Resident, pk=pk)
+    product_list = BasketResident.objects.filter(user_basket=instance)
+    for p in product_list :
+        p.delete()
+    return HttpResponseRedirect(reverse('orders') )
     
 def BasketConvert(request):
     product = Product.objects.all()
@@ -187,15 +193,53 @@ def BasketConvert(request):
             instance_item.save()
             p.delete()
     return HttpResponseRedirect(reverse('basket') )
+ 
+def BasketResidentConvert(request, pk):
+    product = Product.objects.all()
+    instance = get_object_or_404(Resident, pk=pk)
+    order_list = BasketResident.objects.filter(user_basket=instance)
+    can_save = True
+    for p in order_list :
+        product = get_object_or_404(Product, pk=p.product.pk)
+        if p.qty >= product.prod_stock:
+            p.error = "Stock insuffisant - Stock restant :"+ str(product.prod_stock)
+            p.save()
+            can_save = False
+    if can_save:
+        id = Order.objects.latest('id')
+        title = "AMC_Shop_"+datetime.datetime.now().strftime ("%d%m%Y")+"_"+str((id.id+1))
+        instance_order = Order(order_user=instance,title=title)
+        instance_order.save()
+        for p in order_list :
+            instance_item = OrderItem(product=p.product,order=instance_order,qty=p.qty)
+            instance_item.save()
+            p.delete()
+    return HttpResponseRedirect(reverse('orders') )
 
 def ProductAddOne(request, pk):
     instance=get_object_or_404(Basket, pk = pk)
-
     if request.method == 'POST':
             instance.qty += 1
             instance.save()
     return HttpResponseRedirect(reverse('basket') )
 
+def BasketResidentAddOne(request, pk):
+    instance=get_object_or_404(BasketResident, pk = pk)
+    if request.method == 'POST':
+            instance.qty += 1
+            instance.save()
+    return HttpResponseRedirect(reverse('orders') )
+    
+def BasketResidentRemoveOne(request, pk):
+    instance=get_object_or_404(BasketResident, pk = pk)
+
+    if request.method == 'POST':
+        if instance.qty - 1 > 0 :
+            instance.qty -= 1
+            instance.save()
+        elif instance.qty - 1 == 0:
+            instance.delete()
+    return HttpResponseRedirect(reverse('orders') )
     
 def ProductRemoveOne(request, pk):
     instance=get_object_or_404(Basket, pk = pk)
