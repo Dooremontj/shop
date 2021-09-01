@@ -101,3 +101,8 @@
 #btnCreate{
 		margin-bottom : 10px;
 }
+
+#myTable td a.btn-dark{
+	color : #fff;
+	font-weight: initial;
+}

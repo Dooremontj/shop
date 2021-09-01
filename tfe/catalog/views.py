@@ -153,7 +153,7 @@ def BasketResidentListView(request,pk):
     product_list = BasketResident.objects.filter(user_basket=pk)
     points = 0
     for p in product_list :
-        points += p.product.prod_limit
+        points += p.product.prod_limit * p.qty
     instance = get_object_or_404(Resident, pk=pk)
     family = Resident.objects.filter(badge=instance.badge)
     familynumber = family.count()
@@ -198,23 +198,60 @@ def BasketResidentConvert(request, pk):
     product = Product.objects.all()
     instance = get_object_or_404(Resident, pk=pk)
     order_list = BasketResident.objects.filter(user_basket=instance)
+    verifpoint = request.POST.get('verifpoint')
+    date = datetime.date.today()
+    start_week = date - datetime.timedelta(date.weekday())
+    end_week = start_week + datetime.timedelta(7)
+    family = Resident.objects.filter(badge=instance.badge)
+    pklist = []
+    for f in family:
+        pklist.append(f.id)
+    entries = Order.objects.filter(date__range=[start_week, end_week], order_user__in=pklist)
+    point =0
+    
+    for p in entries :
+        point += p.points
+    pts=0
     can_save = True
+    error = []
     for p in order_list :
-        product = get_object_or_404(Product, pk=p.product.pk)
-        if p.qty >= product.prod_stock:
-            p.error = "Stock insuffisant - Stock restant :"+ str(product.prod_stock)
+        pts += p.product.prod_limit * p.qty
+        if p.qty > p.product.prod_stock:
+            error.append("Stock insuffisant de : "+p.product.prod_name +" - Stock restant :"+ str(p.product.prod_stock))
             p.save()
             can_save = False
+            
+    if verifpoint:       
+        instance = get_object_or_404(Resident, pk=pk)
+        family = Resident.objects.filter(badge=instance.badge)
+        familynumber = family.count()
+        user_points = get_object_or_404(LimitFamily, compo_family=str(familynumber)).point_by_week
+        restant = user_points - point
+        if pts > restant:
+            error.append("limite de point dépassé, point restant :" + str(restant))
+            can_save = False
+       
+    
     if can_save:
+       
+        #for p in order_list :
+            
         id = Order.objects.latest('id')
         title = "AMC_Shop_"+datetime.datetime.now().strftime ("%d%m%Y")+"_"+str((id.id+1))
-        instance_order = Order(order_user=instance,title=title)
+        instance_order = Order(order_user=instance,title=title,points = pts)
         instance_order.save()
         for p in order_list :
             instance_item = OrderItem(product=p.product,order=instance_order,qty=p.qty)
             instance_item.save()
             p.delete()
-    return HttpResponseRedirect(reverse('orders') )
+    responseData = {
+        'error': error,
+        'verifpoint': verifpoint,
+        #'entries':list(entries.values()),
+        'point':point,
+    }
+    return JsonResponse(responseData)
+    # return HttpResponseRedirect(reverse('orders') )
 
 def ProductAddOne(request, pk):
     instance=get_object_or_404(Basket, pk = pk)

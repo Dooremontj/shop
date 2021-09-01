@@ -19,6 +19,7 @@
 		<tr>
 			<th scope="col">Image</th>
 			<th scope="col">Produit</th>
+			<th scope="col">Points</th>
 			<th scope="col">Quantité</th>
 		</tr>
 	</thead>
@@ -32,6 +33,9 @@
 					<a href=# onclick="getProductDetail({{ product.product.id }})" class="fa fa-pencil">{{ product.product.prod_name }}</a>
 					<p {% if product.error == null %} hidden {% endif %} class="errorform"> {{ product.error }} </p>
 				</td>
+				<td scope="row" >
+					{{ product.product.prod_limit }}
+				</td>
 				<td>
 				<form class="btnaddandremove" action="{% url 'basketresident-remove-one' product.id %}" method="post">
 				{% csrf_token %}
@@ -43,9 +47,22 @@
 </table>
 <p> Total de points de la commande : {{ points }} </p>
 <p> Points résidents : {{ user_points }} </p>
-<td><a style="text-align: center;" href="{%url 'basketresident-convert' resident.id %}" class="fa fa-pencil" >
+<div class="input-group mb-3">
+  <div class="input-group-prepend">
+    <div class="input-group-text">
+      <input id="verifpoint" type="checkbox" aria-label="Checkbox for following text input" checked>
+    </div>
+  </div>
+  <input type="text" class="form-control" aria-label="Text input with checkbox" value="Vérifier points" disabled>
+</div>
+<p id="error" ></p>
+<td><!--<a style="text-align: center;" href="{%url 'basketresident-convert' resident.id %}" class="fa fa-pencil" >
 		<img src="/static/media/icon/valid.png " alt="Delete">
-		</a></td>
+		</a>-->
+		<a style="text-align: center;" href=# onclick="validateBasket({{ resident.id }})" class="fa fa-pencil" >
+		<img src="/static/media/icon/valid.png " alt="Delete">
+		</a>
+		</td>
   {% else %}
 <p>Votre panier est vide.</p>
   {% endif %}

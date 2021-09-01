@@ -26,9 +26,18 @@
 				<td scope="row w-25" ><a href=# onclick="getProductDetail({{ product.id }})" class="fa fa-pencil"><img width="100" height="100" src="{{ product.prod_img.url }} " alt="{{ product.prod_name }}" class="img-fluid img-thumbnail"></a></td>
 				<!--<td scope="row" ><a href="{{ product.get_absolute_url }}">{{ product.prod_name }}</a></td> -->
 				<td scope="row" ><a href=# onclick="getProductDetail({{ product.id }})" class="fa fa-pencil">{{ product.prod_name }}</a></td>
-				<td {% if request.user|has_group:"Shop Members" %} {% if product.prod_stock <= product.prod_min %} class="warning-stock" {% endif %}{% endif %} >
-				<a href=# onclick="getRestock({{product.id }})" class="fa fa-pencil">
-				{{product.prod_stock}}</a></td>
+				{% if request.user|has_group:"Shop Members" %} 
+				<td>
+				{% if product.prod_stock == 0 %}
+					<button class="btn btn-danger" onclick="getRestock({{product.id }})" >{{product.prod_stock}}</button>
+				{% elif product.prod_stock <= product.prod_min %}
+					<button class="btn btn-warning" onclick="getRestock({{product.id }})">{{product.prod_stock}}</button>
+				{% else %}
+					<button class="btn btn-success" onclick="getRestock({{product.id }})">{{product.prod_stock}}</button>
+				{% endif %}
+				{% endif %}
+				<!--<a href=# onclick="getRestock({{product.id }})" class="fa fa-pencil">
+				{{product.prod_stock}}</a>--></td>
 				<td>{{product.prod_ref_in}}</td>
 				{% if request.user|has_group:"Shop Members" %}
 				<td ><a href=# onclick="getSupplierDetail({{product.prod_supplier.pk }})" class="fa fa-pencil">{{ product.prod_supplier }}</a></td>
