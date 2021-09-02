@@ -21,11 +21,12 @@
 			<th scope="col">Produit</th>
 			<th scope="col">Points</th>
 			<th scope="col">Quantité</th>
+			<th scope="col">Total</th>
 		</tr>
 	</thead>
 	<tbody id="myTable">
   {% for product in product_list %}
-		<tr>
+		<tr id="{{ product.id }}">
 			<td scope="row w-25" >
 				<img width="100" height="100" src="{{ product.product.prod_img.url }} " alt="{{ product.product.prod_name }}" class="img-fluid img-thumbnail">
 				</td>
@@ -37,15 +38,22 @@
 					{{ product.product.prod_limit }}
 				</td>
 				<td>
-				<form class="btnaddandremove" action="{% url 'basketresident-remove-one' product.id %}" method="post">
+				<!--<form class="btnaddandremove" action="{% url 'basketresident-remove-one' product.id %}" method="post">-->
+				<a href=# onclick="RemoveOneToBasket({{ product.id }}, {{product.qty}}, {{ product.points }},{{ product.product.prod_limit }}, {{ points }})" class="btnaddandremove btn btn-danger"> - </a>
 				{% csrf_token %}
-				<input class="btn btn-danger" type="submit" value="-" /> 
-				</form> {{ product.qty }} <form class="btnaddandremove" action="{% url 'basketresident-add-one' product.id %}" method="post">{% csrf_token %}<input class="btn btn-success" type="submit" value="+" /></form></td>
+				<!-- <input class="btn btn-danger" type="submit" value="-" /> 
+				</form> -->
+				<p name="qty_asked" id="qty_asked{{product.id}}">{{ product.qty }}</p>
+				<!--<form class="btnaddandremove" action="{% url 'basketresident-add-one' product.id %}" method="post">{% csrf_token %}<input class="btn btn-success" type="submit" value="+" />
+				</form>-->
+				<a href=# onclick="AddOneToBasket({{ product.id }}, {{product.qty}}, {{ product.points }},{{ product.product.prod_limit }}, {{ points }})" class="btnaddandremove btn btn-success"> + </a>
+				</td>
+				<td> <p name="points" id="points{{product.id}}">{{ product.points }}</p> </td>
 		</tr>
   {% endfor %}
 	</tbody>
 </table>
-<p> Total de points de la commande : {{ points }} </p>
+<p name="totalpoints" id="totalpoints" > Total de points de la commande : {{ points }} </p>
 <p> Points résidents : {{ user_points }} </p>
 <div class="input-group mb-3">
   <div class="input-group-prepend">
@@ -55,7 +63,7 @@
   </div>
   <input type="text" class="form-control" aria-label="Text input with checkbox" value="Vérifier points" disabled>
 </div>
-<p id="error" ></p>
+<p id="error" class="errorform"></p>
 <td><!--<a style="text-align: center;" href="{%url 'basketresident-convert' resident.id %}" class="fa fa-pencil" >
 		<img src="/static/media/icon/valid.png " alt="Delete">
 		</a>-->

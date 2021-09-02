@@ -139,9 +139,10 @@ def AddBasketResident(request,pk):
         if BasketResident.objects.filter(product=productselected, user_basket=residentselected).exists():
             instancebasket = get_object_or_404(BasketResident, product=productselected, user_basket=residentselected)
             instancebasket.qty += int(request.POST.get('qty'))
+            instancebasket.points = instancebasket.qty*productselected.prod_limit
             instancebasket.save()
         else:
-            instance = BasketResident(product=productselected , qty=request.POST.get('qty') , user_basket=residentselected)
+            instance = BasketResident(product=productselected , qty=request.POST.get('qty') , user_basket=residentselected, points=int(request.POST.get('qty'))*productselected.prod_limit)
             instance.save()
     return HttpResponseRedirect(reverse('product-shop') )
     
@@ -264,6 +265,7 @@ def BasketResidentAddOne(request, pk):
     instance=get_object_or_404(BasketResident, pk = pk)
     if request.method == 'POST':
             instance.qty += 1
+            instance.points = instance.qty*instance.product.prod_limit
             instance.save()
     return HttpResponseRedirect(reverse('orders') )
     
@@ -273,6 +275,7 @@ def BasketResidentRemoveOne(request, pk):
     if request.method == 'POST':
         if instance.qty - 1 > 0 :
             instance.qty -= 1
+            instance.points = instance.qty*instance.product.prod_limit
             instance.save()
         elif instance.qty - 1 == 0:
             instance.delete()

@@ -18,31 +18,31 @@
 						<tr>
 							<td colspan="2">{{ order.order_user }}</td>
 						</tr>
-						<tr>
-							<th scope="col">Titre</th>
-							<th scope="col">Date</th>
-						</tr>
+
 						<tr >
-							<td>{{ order.title }}</td>
-							<td>{{ order.date }}</td>
+
+							<th colspan="2">{{ order.date }}</th>
 						</tr>
 						<tr>
 							<th scope="col">Produit</th>
 							<th scope="col">Quantité</th>
 						</tr>
-			{% for orderitem in order.orderitem_set.all %}
+					{% for orderitem in order.orderitem_set.all %}
 
 						<tr>
-							<td id="orderdetail">{{ orderitem.product.prod_name }}</td>
+							<td >{{ orderitem.product.prod_name }}</td>
 							<td>{{ orderitem.qty }}</td>
 						</tr>
 
-			{% endfor %}
-
+					{% endfor %}
+						<tr>
+							<td colspan="2">Total points : {{ order.points }}</td>
+						</tr>
 
 					</tbody>
 				</table>
 			</div>
+			<br>
 			 {% endfor %}
   {% else %}
 			<p>There are no orders in the shop.</p>

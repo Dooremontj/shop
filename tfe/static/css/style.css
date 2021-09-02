@@ -106,3 +106,11 @@
 	color : #fff;
 	font-weight: initial;
 }
+
+tbody#myTable tr td p{
+	display : inline-block;
+}
+
+p#error{
+		text-align:center;
+}

@@ -133,7 +133,20 @@ var url ="{% url 'basket-resident-detail' 0 %}".replace('0', user_basket);
 function AddToBasket(pk,stock,prod) {
 var url ="{% url 'add-basket-resident' 0 %}".replace('0', pk);
 var qty_asked =$("#qty"+pk).val();
-	if ( stock >= qty_asked) {
+	if (qty_asked == 0){
+		$('[data-toggle="popover"]').attr('data-content','Quantitée ne peut pas être nulle');
+		$('[data-toggle="popover"]').attr('data-original-title','Alerte');
+		$('[data-toggle="popover"][data-timeout]').on('shown.bs.popover', function() {
+				this_popover = $(this);
+				$('.popover-header').css("color", "#ff0000");
+				$('.popover-body').css("color", "#ff0000");
+				setTimeout(function () {
+					this_popover.popover('hide');
+				}, $(this).data("timeout"));
+			});
+		
+	}
+	else if ( stock >= qty_asked) {
 	  $.ajax({
 		   type: "POST",
 		   url: url,
@@ -171,6 +184,71 @@ var qty_asked =$("#qty"+pk).val();
 		
 	}
 }
+
+function RemoveOneToBasket(pk,qty_asked,points,point,total) {
+var url ="{% url 'basketresident-remove-one' 0 %}".replace('0', pk);
+	  $.ajax({
+		   type: "POST",
+		   url: url,
+		   data:
+				{
+					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+				},
+		   success: function(data) {
+				var p = document.getElementById('qty_asked'+pk);
+				var text = p.textContent;
+				var number = Number(text);
+				$("#qty_asked"+pk).text(number-1);
+				if (number-1 === 0){
+					console.log("zero");
+					document.getElementById(pk).style.display = "none";
+					p = document.getElementById('totalpoints');
+					text = p.textContent.replace( /^\D+/g, '');;
+					number = Number(text);
+					var newtotal = number-point
+					$("#totalpoints").text('Total de points de la commande : '+newtotal)
+				} else {
+					p = document.getElementById('points'+pk);
+					text = p.textContent;
+					number = Number(text);
+					$("#points"+pk).text(number-point)
+					p = document.getElementById('totalpoints');
+					text = p.textContent.replace( /^\D+/g, '');;
+					number = Number(text);
+					var newtotal = number-point
+					$("#totalpoints").text('Total de points de la commande : '+newtotal)
+				}
+			}
+		 });
+}
+
+function AddOneToBasket(pk,qty_asked,points,point,total) {
+var url ="{% url 'basketresident-add-one' 0 %}".replace('0', pk);
+	  $.ajax({
+		   type: "POST",
+		   url: url,
+		   data:
+				{
+					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+				},
+		   success: function(data) {
+				var p = document.getElementById('qty_asked'+pk);
+				var text = p.textContent;
+				var number = Number(text);
+				$("#qty_asked"+pk).text(number+1)
+				p = document.getElementById('points'+pk);
+				text = p.textContent;
+				number = Number(text);
+				$("#points"+pk).text(number+point)
+				p = document.getElementById('totalpoints');
+				text = p.textContent.replace( /^\D+/g, '');
+				number = Number(text);
+				var newtotal = number+point
+				$("#totalpoints").text('Total de points de la commande : '+newtotal)
+			}
+		 });
+}
+
 
 function getResidentDetail(pk) {
 var url ="{% url 'resident-detail-family' 0 %}".replace('0', pk);
