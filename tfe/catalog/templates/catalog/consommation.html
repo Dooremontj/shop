@@ -1,0 +1,54 @@
+{% extends "index.html" %}
+{% load static %} 
+{% load auth_extras %}
+{% block title %}Consommation des produits{% endblock %}
+{% block content %}
+
+<form action="{% url 'consommation' %}" method="post">
+{% csrf_token %}	
+  <label for="startDate">Date de début:</label>
+  <input class="selectconso" type="date" id="startDate" name="startDate" value="{{start_week|date:"Y-m-d" }}">
+  <label for="endDate">Date de fin:</label>
+  <input class="selectconso" type="date" id="endDate" name="endDate" value="{{end_week|date:"Y-m-d" }}">
+  <input class="btn btn-dark" type="submit">
+  <select class="selectconso" name="option">
+		<option  value="ALL" {% if op == "TOUS" %}selected="selected" {% endif %}>---TOUS---</option>
+		<option value="RESIDENT"{% if op == "RESIDENT" %}selected="selected" {% endif %}>RESIDENT</option>
+		<option value="PERSONNEL"{% if op == "PERSONNEL" %}selected="selected" {% endif %}>PERSONNEL</option>
+  </select>
+</form>  
+
+  {% if dict %}
+<table class="datatable table table-striped" id="conso" >
+	<thead>
+		<tr>
+			<th scope="col">Produit</th>
+			<th scope="col">Quantité</th>
+		</tr>
+	</thead>
+	<tbody id="myTable">
+{% for mykey,myvalue in dict.items %}
+		<tr>
+				<td>{{ mykey }}</td>
+				<td>{{ myvalue }}</td>
+		</tr>
+  {% endfor %}
+	</tbody>
+</table>
+  {% else %}
+<p>Pas de consommation entre les dates choisis.</p>
+  {% endif %}
+{% endblock %}  
+{% block jscript %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+
+<script>
+$(document).ready(function(){
+
+  $('#conso').DataTable();
+  
+});
+</script>
+{% endblock %}

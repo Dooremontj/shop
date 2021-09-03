@@ -5,6 +5,13 @@
 {% block content %}
 <a id="btnCreate" class="btn btn-dark" href="{% url 'product-create' %} ">+ Ajouter un produit</a>	
   {% if product_list %}
+  {% if request.user|has_group:"Shop Members" %} 
+  <div>
+  <a  class="btn btn-dark" href="{% url 'products' %} ">Tous</a>	
+  <a class="btn btn-dark" href="{% url 'products-warning' %} ">Produit à commander</a>
+  <a class="btn btn-dark" href="{% url 'products-out' %} ">Produit en rupture</a>	
+  </div>
+  {% endif %}
   <br>
   	<table class="datatable table table-striped" id="example" >
 		<thead>

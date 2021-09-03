@@ -7,7 +7,10 @@ urlpatterns = [
     path('', views.index, name='index'),
     #Gestion produit
     path('print/<int:pk>', login_required(views.PrintOrder), name='print'),
+    path('consommation/', login_required(views.ConsommationView), name='consommation'),
     path('product/', login_required(views.ProductListView.as_view()), name='products'),
+    path('product/warning/', login_required(views.ProductListWarningView), name='products-warning'),
+    path('product/out/', login_required(views.ProductListOutView), name='products-out'),
     path('product/<int:pk>', login_required(views.ProductDetailView.as_view()), name='product-detail'),
     path('product/create/', login_required(views.ProductCreate), name='product-create'),
     path('product/<int:pk>/update/', login_required(views.ProductUpdate), name='product-update'),

@@ -19,11 +19,67 @@ from django.core import serializers
 from django.contrib import messages
 import datetime
 from django.contrib.auth.decorators import permission_required
-from django.db.models import Q
+from django.db.models import Q, F
+from django.utils import formats
 
 def index(request):
 	return render(request, 'index.html')
-    
+
+def ConsommationView(request):
+    prout = 'prout'
+    dict = {}
+    op = "TOUS"
+    if request.method == 'POST':
+        op = request.POST.get('option')
+        prout = 'proutIf'
+        start_week= datetime.datetime.strptime(request.POST.get('startDate'), '%Y-%m-%d')
+        end_week =datetime.datetime.strptime(request.POST.get('endDate'), '%Y-%m-%d')
+        orderResident = Order.objects.filter(date__range=[start_week, end_week])
+        orderFed = FedOrder.objects.filter(date__range=[start_week, end_week])
+        orderitemResident = OrderItem.objects.filter(order__in=orderResident)
+        orderitemFed = FedOrderItem.objects.filter(order__in=orderFed)
+        if op == 'RESIDENT':
+            prout = 'proutRESIDENT'
+            for o in orderitemResident :
+                if o.product.prod_name in dict :
+                    value = dict.get(o.product.prod_name)
+                    value += o.qty
+                    dict[o.product.prod_name] = value
+                else :
+                    dict[o.product.prod_name] = o.qty
+        elif  op == 'PERSONNEL':
+            prout = 'proutPRO'
+            for o in orderitemFed :
+                if o.product.prod_name in dict :
+                    value = dict.get(o.product.prod_name)
+                    value += o.qty
+                    dict[o.product.prod_name] = value
+                else :
+                    dict[o.product.prod_name] = o.qty
+        else : 
+            prout = 'proutALL'
+            for o in orderitemResident :
+                if o.product.prod_name in dict :
+                    value = dict.get(o.product.prod_name)
+                    value += o.qty
+                    dict[o.product.prod_name] = value
+                else :
+                    dict[o.product.prod_name] = o.qty
+            for o in orderitemFed :
+                if o.product.prod_name in dict :
+                    value = dict.get(o.product.prod_name)
+                    value += o.qty
+                    dict[o.product.prod_name] = value
+                else :
+                    dict[o.product.prod_name] = o.qty
+    else :
+        prout = 'proutElse'    
+        date = datetime.date.today()
+        start_week = date - datetime.timedelta(date.weekday())
+        end_week = start_week + datetime.timedelta(7)
+        orderResident = Order.objects.filter(date__range=[start_week, end_week])
+        orderFed = FedOrder.objects.filter(date__range=[start_week, end_week])
+    return render(request, 'catalog/consommation.html', {'start_week':start_week,'end_week' : end_week,'op':op, 'dict':dict, 'prout':prout})
 ################################################################################################
 #products
 ################################################################################################
@@ -33,6 +89,14 @@ def PrintOrder(request,pk):
     
 class ProductListView(generic.ListView):
     model = Product
+
+def ProductListWarningView(request):
+    product_list = Product.objects.filter(prod_stock__range=(1,F('prod_min')))
+    return render(request,'catalog/product_list.html', {'product_list':product_list})
+
+def ProductListOutView(request):
+    product_list = Product.objects.filter(prod_stock='0')
+    return render(request,'catalog/product_list.html', {'product_list':product_list})
     
 def ProductListResidentView(request):
     user_basket = Resident.objects.all()
