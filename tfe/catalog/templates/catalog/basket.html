@@ -31,11 +31,25 @@
 					<a href=# onclick="getProductDetail({{ product.product.id }})" class="fa fa-pencil">{{ product.product.prod_name }}</a>
 					<p {% if product.error == null %} hidden {% endif %} class="errorform"> {{ product.error }} </p>
 				</td>
+				
 				<td>
+				<!--<form class="btnaddandremove" action="{% url 'basketresident-remove-one' product.id %}" method="post">-->
+				<a href=# onclick="RemoveOneToBasket({{ product.id }}, {{product.qty}})" class="btnaddandremove btn btn-danger"> - </a>
+				{% csrf_token %}
+				<!-- <input class="btn btn-danger" type="submit" value="-" /> 
+				</form> -->
+				<p name="qty_asked" id="qty_asked{{product.id}}">{{ product.qty }}</p>
+				<!--<form class="btnaddandremove" action="{% url 'basketresident-add-one' product.id %}" method="post">{% csrf_token %}<input class="btn btn-success" type="submit" value="+" />
+				</form>-->
+				<a href=# onclick="AddOneToBasket({{ product.id }}, {{product.qty}})" class="btnaddandremove btn btn-success"> + </a>
+				</td>
+				
+				<!--<td>
 				<form class="btnaddandremove" action="{% url 'product-remove-one' product.id %}" method="post">
 				{% csrf_token %}
 				<input class="btn btn-danger" type="submit" value="-" /> 
 				</form> {{ product.qty }} <form class="btnaddandremove" action="{% url 'product-add-one' product.id %}" method="post">{% csrf_token %}<input class="btn btn-success" type="submit" value="+" /></form></td>
+			-->
 		</tr>
   {% endfor %}
 	</tbody>
@@ -68,6 +82,46 @@ var url ="{% url 'product-detail' 0 %}".replace('0', pk);
 		   $('#modalProdDetail').modal('show');
        }
      });
+}
+
+function RemoveOneToBasket(pk,qty_asked) {
+var url ="{% url 'product-remove-one' 0 %}".replace('0', pk);
+	  $.ajax({
+		   type: "POST",
+		   url: url,
+		   data:
+				{
+					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+				},
+		   success: function(data) {
+				var p = document.getElementById('qty_asked'+pk);
+				var text = p.textContent;
+				var number = Number(text);
+				$("#qty_asked"+pk).text(number-1);
+				if (number-1 === 0){
+					document.getElementById(pk).style.display = "none";
+				} 
+			}
+		 });
+}
+
+function AddOneToBasket(pk,qty_asked) {
+var url ="{% url 'product-add-one' 0 %}".replace('0', pk);
+	  $.ajax({
+		   type: "POST",
+		   url: url,
+		   data:
+				{
+					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+				},
+		   success: function(data) {
+				var p = document.getElementById('qty_asked'+pk);
+				var text = p.textContent;
+				var number = Number(text);
+				$("#qty_asked"+pk).text(number+1)
+
+			}
+		 });
 }
 
 

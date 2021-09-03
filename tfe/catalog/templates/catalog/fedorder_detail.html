@@ -16,9 +16,13 @@
 
     {% for orderitem in fedorder.fedorderitem_set.all %}
       <div>
-	  <div id="orderdetail"><img width="100" height="100" src="{{ orderitem.product.prod_img.url }}" alt="{{ order.product.prod_name }}" class="img-fluid img-thumbnail"></div>
-      <div id="orderdetail"><div>produit : {{ orderitem.product.prod_name }}</div>
-	  <div><strong>quantité :</strong> {{ orderitem.qty }}</div></div></div>
+	  <div class="orderdetail" style="vertical-align: text-bottom;"><img width="50" height="50" src="{{ orderitem.product.prod_img.url }}" alt="{{ order.product.prod_name }}" class="img-fluid img-thumbnail"></div>
+      <div class="orderdetail"><div>produit : {{ orderitem.product.prod_name }}</div>
+	  <div class="orderdetail">quantité commandée : {{ orderitem.qty }}</div>
+	  {% if fedorder.status == "CLOSED" %}
+	  <div class="form-control qty"><strong>quantité fournis :</strong> {{ orderitem.qty_supplied }}</div>
+	  {% endif %}
+	  </div></div>
 
    {% endfor %}
 

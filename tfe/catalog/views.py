@@ -19,6 +19,7 @@ from django.core import serializers
 from django.contrib import messages
 import datetime
 from django.contrib.auth.decorators import permission_required
+from django.db.models import Q
 
 def index(request):
 	return render(request, 'index.html')
@@ -120,9 +121,9 @@ def ProductRestock(request, pk):
 #Basket
 ################################################################################################
 
-def AddBasket(request):
+def AddBasket(request,pk):
     if request.method == 'POST':
-        productselected = get_object_or_404(Product, pk=request.POST.get('product'))
+        productselected = get_object_or_404(Product, pk=pk)
         if Basket.objects.filter(product=productselected, user_basket=request.user).exists():
             instancebasket = get_object_or_404(Basket, product=productselected, user_basket=request.user)
             instancebasket.qty += int(request.POST.get('qty'))
@@ -180,7 +181,7 @@ def BasketConvert(request):
     can_save = True
     for p in order_list :
         product = get_object_or_404(Product, pk=p.product.pk)
-        if p.qty >= product.prod_stock:
+        if p.qty > product.prod_stock:
             p.error = "Stock insuffisant - Stock restant :"+ str(product.prod_stock)
             p.save()
             can_save = False
@@ -190,7 +191,7 @@ def BasketConvert(request):
         instance_order = FedOrder(order_user=request.user,title=title)
         instance_order.save()
         for p in order_list :
-            instance_item = FedOrderItem(product=p.product,order=instance_order,qty=p.qty)
+            instance_item = FedOrderItem(product=p.product,order=instance_order,qty=p.qty, qty_supplied=p.qty)
             instance_item.save()
             p.delete()
     return HttpResponseRedirect(reverse('basket') )
@@ -296,17 +297,21 @@ def ProductRemoveOne(request, pk):
 #Commande Personnel
 ################################################################################################
 
-class FedOrderListView(generic.ListView):
-    model = FedOrder
+def FedOrderListView(request):
+    fedorder_list_open = FedOrder.objects.filter(Q(status='PARTIEL') | Q(status='OPEN'))
+    fedorder_list_close = FedOrder.objects.filter(status='CLOSED')
+    return render(request, 'catalog/fedorder_list.html', {'fedorder_list': fedorder_list_open, 'fedorder_list_closed':fedorder_list_close})
 
 class FedOrderDelete(DeleteView):
     model = FedOrder
     success_url = reverse_lazy('fed-orders')
     
 def MyFedOrderListView(request):
-    fedorder_list = FedOrder.objects.filter(order_user=request.user)
+    fedorder_list = FedOrder.objects.filter(Q(order_user=request.user, status='PARTIEL') | Q(order_user=request.user, status='OPEN'))
+    fedorder_list_close = FedOrder.objects.filter(order_user=request.user, status='CLOSED')
     return render(request, 'catalog/fedorder_list.html', {
             'fedorder_list': fedorder_list,
+            'fedorder_list_closed':fedorder_list_close
     })
 
 class FedOrderDetailView(LoginRequiredMixin, generic.DetailView):
@@ -315,15 +320,48 @@ class FedOrderDetailView(LoginRequiredMixin, generic.DetailView):
 @permission_required('catalog.can_close_order')
 def FedOrderClose(request, pk):
     instance = get_object_or_404(FedOrder, pk=pk)
-    instance.status = "CLOSED"
-    instance.save()
     fedorderitem = FedOrderItem.objects.filter(order = instance)
+    nbitem = FedOrderItem.objects.filter(order = instance).count()
+    count = 0
+    orderin = 0
     for f in fedorderitem:
-        instance_product = get_object_or_404(Product, pk = f.product.pk)
-        instance_product.prod_stock = instance_product.prod_stock-f.qty
-        instance_product.save()
+        orderin += 1
+        if f.already_delivered :
+            count += 1
+        if f.delivered and not f.already_delivered :
+            instance_product = get_object_or_404(Product, pk = f.product.pk)
+            if instance_product.prod_stock > f.qty_supplied :
+                instance_product.prod_stock = instance_product.prod_stock-f.qty_supplied
+                instance_product.save()
+                f.already_delivered = True
+                f.save()
+                count += 1
+    print(count, os.getcwd())
+    print(nbitem, os.getcwd())
+    print(orderin, os.getcwd())
+    if count != 0 :
+        if count == orderin :
+            instance.status = "CLOSED"
+        else : 
+            instance.status = "PARTIEL"
+        instance.prepared_by = request.user
+        instance.save()
     fedorder_list = FedOrder.objects.all()
     return HttpResponseRedirect(reverse('fed-orders'))
+
+# @permission_required('catalog.can_close_order')
+# def FedOrderPartiel(request, pk):
+    # instance = get_object_or_404(FedOrder, pk=pk)
+    # instance.status = "PARTIEL"
+    # instance.prepared_by = request.user
+    # instance.save()
+    # fedorderitem = FedOrderItem.objects.filter(order = instance)
+    # for f in fedorderitem:
+        # instance_product = get_object_or_404(Product, pk = f.product.pk)
+        # instance_product.prod_stock = instance_product.prod_stock-f.qty_supplied
+        # instance_product.save()
+    # fedorder_list = FedOrder.objects.all()
+    # return HttpResponseRedirect(reverse('fed-orders'))
 
 def FedOrderUpdateView(request, pk):
     instance = get_object_or_404(FedOrder, pk=pk)
@@ -333,7 +371,11 @@ def FedOrderUpdateView(request, pk):
     
 def FedOrderItemUpdateView(request,pk):
     instance = get_object_or_404(FedOrderItem, pk=pk)
-    instance.qty = request.POST.get('qty')
+    instance.qty_supplied = request.POST.get('qty')
+    if request.POST.get('unchecked') == '1' :
+        instance.delivered = True
+    else : 
+        instance.delivered = False
     instance.save()
     return render(request, 'catalog/fedorder_update.html', {
             'fedorderitem': instance,

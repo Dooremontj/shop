@@ -1,24 +1,25 @@
 {% extends "index.html" %}
 
 {% block content %}
-<div class="col-md-4">
-  {% if form.errors %}
-    <p>Votre mot de passe et votre nom d'utilisateur ne correspondent pas.</p>
-  {% endif %}
+<div>
+
 
   {% if next %}
     {% if user.is_authenticated %}
       <p>Your account doesn't have access to this page. To proceed,
       please login with an account that has access.</p>
     {% else %}
-      <p>Veuillez vous connecter svp.</p>
+      <p class="text-center">Veuillez vous connecter svp.</p>
     {% endif %}
   {% endif %}
 
   <form method="post" action="{% url 'login' %}">
-  <div class="form-group">
+  <div class="text-center">
     {% csrf_token %}
-    <table>
+    <table style="
+    margin-right: auto;
+    margin-left: auto; text-align: right;
+">
       <tr>
         <td>{{ form.username.label_tag }}</td>
         <td>{{ form.username }}</td>
@@ -33,6 +34,9 @@
 	</div>
 
   </form>
+    {% if form.errors %}
+    <p class="text-center">Votre mot de passe et votre nom d'utilisateur ne correspondent pas.</p>
+  {% endif %}
 	</div>
   {# Assumes you setup the password_reset view in your URLconf #}
  <!-- <p><a href="{% url 'password_reset' %}">Lost password?</a></p> -->

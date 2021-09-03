@@ -14,7 +14,7 @@ urlpatterns = [
     path('product/<int:pk>/restock/', login_required(views.ProductRestock), name='product-restock'),
     path('product/shop/', login_required(views.ProductListShop), name='product-shop'),
     #Gestion panier
-    path('product/addtobasket/', login_required(views.AddBasket), name='add-basket'),
+    path('product/addtobasket/<int:pk>', login_required(views.AddBasket), name='add-basket'),
     path('product/addtobasketresident/<int:pk>', login_required(views.AddBasketResident), name='add-basket-resident'),
     path('product/<int:pk>/addone/', login_required(views.ProductAddOne), name='product-add-one'),
     path('product/<int:pk>/remove/', login_required(views.ProductRemoveOne), name='product-remove-one'),
@@ -27,11 +27,12 @@ urlpatterns = [
     path('basket/convert', login_required(views.BasketConvert), name='basket-convert'),
     path('basketresident/<int:pk>/convert', login_required(views.BasketResidentConvert), name='basketresident-convert'),
     #Gestion commande du personnel
-    path('fed-orders/', login_required(views.FedOrderListView.as_view()), name='fed-orders'),
+    path('fed-orders/', login_required(views.FedOrderListView), name='fed-orders'),
     path('fed-order/<int:pk>/delete/', login_required(views.FedOrderDelete.as_view()), name='fed-order-delete'),
     path('fed-order/<int:pk>', login_required(views.FedOrderDetailView.as_view()), name='fed-order-detail'),
     path('my-fed-orders/', login_required(views.MyFedOrderListView), name='my-fed-orders'),
     path('my-fed-orders/<int:pk>/close', login_required(views.FedOrderClose), name='fed-order-closed'),
+    # path('my-fed-orders/<int:pk>/partiel', login_required(views.FedOrderPartiel), name='fed-order-partiel'),
     path('my-fed-orders/<int:pk>/update', login_required(views.FedOrderUpdateView), name='fed-order-update'),
     path('fed-orderitem/<int:pk>/update/', login_required(views.FedOrderItemUpdateView), name='fed-orderitem-update'),
     #Gestion Commande

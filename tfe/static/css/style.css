@@ -26,8 +26,14 @@
 
 }
 
-#orderdetail {
+.orderdetail {
 	display : inline-block;
+	margin-bottom: 10px;
+}
+
+div.text{
+	display : inline-block;
+	vertical-align : middle;
 }
 
 .DetailOrderModal{
@@ -113,4 +119,34 @@ tbody#myTable tr td p{
 
 p#error{
 		text-align:center;
+}
+
+hr.rounded {
+  border-top: 25px solid #bbb;
+  border-radius: 5px;
+}
+
+.panel-heading{
+	text-align: center;
+}
+
+input.form-control.qty{
+	width : 30%;
+	display : inline-block;
+}
+
+#FedOrdersTable_filter{
+	display:none;
+}#FedOrdersTableClosed_filter{
+	display:none;
+}
+
+input.form-control.check{
+    display: inline-block;
+    width: 5%;
+    vertical-align: middle;
+}
+
+div.vertical-center{
+	text-align: center;
 }

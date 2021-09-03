@@ -119,6 +119,7 @@ class GenericOrder (models.Model):
         
     def __str__(self):
         return self.title
+
         
 class GenericOrderItem (models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
@@ -221,7 +222,8 @@ class LimitFamily (models.Model):
 
 # Commande Personnel
 class FedOrder (GenericOrder):
-    order_user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    order_user = models.ForeignKey(User, related_name='%(class)s_order_user', on_delete=models.CASCADE, null=True)
+    prepared_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='%(class)s_prepared_by', default=None, null=True)
     status = models.CharField(max_length = 20,
 		choices = STATUS_CHOICE,
 		default = 'OPEN', verbose_name="Status de la commande"
@@ -240,6 +242,9 @@ class FedOrder (GenericOrder):
 
 class FedOrderItem(GenericOrderItem):
     order = models.ForeignKey(FedOrder, on_delete=models.CASCADE, null=True)
+    qty_supplied = models.PositiveIntegerField(verbose_name="quantité fournis", null=True)
+    delivered = models.BooleanField(default=False)
+    already_delivered = models.BooleanField(default=False)
 
     class Meta:
         verbose_name = "ligne de commande - membre du personnel"

@@ -22,18 +22,14 @@
     {% for order in fedorder_list %}
 	<tr >
 				<td scope="row"><a href=# onclick="getOrderDetail({{ order.id }})">{{ order.title }}</a></td>
-				<td>{{ order.date }}</td>
+				<td ><span hidden>{{ order.timestamp|date:'Ymd' }}</span>{{ order.date|date:'d/m/Y' }}</td>
 				<td>{{ order.order_user }}</td>
 				<td>{{ order.status }}</td>
 				{% if request.user|has_group:"Shop Members" %}
 				<td ><a href=# onclick="getConfirmDeleteModal({{ order.id }})" class="fa fa-pencil" ><img src="/static/media/icon/delete.png " alt="{{ order.title }}"></a>
 				</td>
-				<td ><a {% if order.status == "OPEN" %}href=# onclick="getOrderUpdate({{ order.id }})" {% endif %} class="fa fa-pencil" >
-				{% if order.status == "OPEN" %}
+				<td ><a href=# onclick="getOrderUpdate({{ order.id }})" class="fa fa-pencil" >
 				<img src="/static/media/icon/open.png " alt="{{ order.title }}">
-				{% else %}
-				<img src="/static/media/icon/close.png " alt="{{ order.title }}">
-				{% endif %} 
 				</a></td>
 				{% endif %} 
 			</tr>
@@ -41,7 +37,58 @@
    		</tbody>
 	</table>
   {% else %}
-    <p>Il n'y a pas de commande.</p>
+    <p>Il n'y a pas de commande en cours.</p>
+  {% endif %} 
+  {% if fedorder_list_closed %}
+  <br>
+<hr class="rounded">
+<br>
+<div class="panel panel-primary accordion"> 
+<div class="panel-heading"> <!-- Panel head -->
+        <a class="btn btn-dark" data-toggle="collapse" data-parent=".accordion" href="#collapseOne">
+            Montrer les commandes cloturées
+        </a>           
+    </div> <!-- END Panel head -->
+    
+    <div id="collapseOne" class="panel-collapse collapse in"> <!-- Collapsable section -->
+        
+        <div class="panel-body">
+  <table class="datatable table table-striped" id="FedOrdersTableClosed" >
+		<thead>
+			<tr>
+				<th scope="col">Titre</th>
+				<th scope="col">Date</th>
+				<th scope="col">Demandeur</th>
+				<th scope="col">Préparateur</th>
+				<!--<th scope="col">Satus</th>-->
+				{% if request.user|has_group:"Shop Members" %}
+				<!--<th scope="col"></th>-->
+				<th scope="col"></th>
+				{% endif %} 
+			</tr>
+		</thead>
+		<tbody id="myTable">
+    {% for order in fedorder_list_closed %}
+	<tr >
+				<td scope="row"><a href=# onclick="getOrderDetail({{ order.id }})">{{ order.title }}</a></td>
+				<td><span hidden>{{ order.timestamp|date:'Ymd' }}</span>{{ order.date|date:'d/m/Y' }}</td>
+				<td>{{ order.order_user }}</td>
+				<td>{{ order.prepared_by }}</td>
+				<!--<td>{{ order.status }}</td>-->
+				{% if request.user|has_group:"Shop Members" %}
+				<!--<td ><a href=# onclick="getConfirmDeleteModal({{ order.id }})" class="fa fa-pencil" ><img src="/static/media/icon/delete.png " alt="{{ order.title }}"></a>
+				</td>-->
+				<td >
+					<img src="/static/media/icon/close.png " alt="{{ order.title }}">
+				</td>
+				{% endif %} 
+			</tr>
+    {% endfor %}
+   		</tbody>
+	</table>
+	</div></div></div> 
+  {% else %}
+    <p>Il n'y a pas de commande en fermées.</p>
   {% endif %} 
     <div id="addModal"></div>
   {% endblock %}  
@@ -49,10 +96,55 @@
   		<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
 		<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
 
+
 <script>
 $(document).ready(function() {
+	$('#FedOrdersTable thead th').each( function () {
+        var title = $(this).text();
+		if (title != ''){
+			$(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+		}
+    } );
+	$('#FedOrdersTableClosed thead th').each( function () {
+        var title = $(this).text();
+		if (title != ''){
+			$(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+		}
+    } );
+	
     $('#FedOrdersTable').DataTable({
-        "order": [[ 3, "desc" ]]
+        initComplete: function () {
+            // Apply the search
+            this.api().columns().every( function () {
+                var that = this;
+ 
+                $( 'input', this.header() ).on( 'keyup change clear', function () {
+                    if ( that.search() !== this.value ) {
+                        that
+                            .search( this.value )
+                            .draw();
+                    }
+                } );
+            } );
+        }
+		
+		
+    } );
+	$('#FedOrdersTableClosed').DataTable({
+		initComplete: function () {
+				// Apply the search
+				this.api().columns().every( function () {
+					var that = this;
+	 
+					$( 'input', this.header() ).on( 'keyup change clear', function () {
+						if ( that.search() !== this.value ) {
+							that
+								.search( this.value )
+								.draw();
+						}
+					} );
+				} );
+			}
     } );
 } );
 
@@ -94,18 +186,39 @@ var url ="{% url 'fed-order-update' 0 %}".replace('0', pk);
 
 function UpdateQty(pk,qty) {
 var url ="{% url 'fed-orderitem-update' 0 %}".replace('0', pk);
-  $.ajax({
-       type: "POST",
-       url: url,
-	   data:
-            {
-                qty:$("#qty"+pk).val(),
-                csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
-            },
-       success: function(data) {
-			
-       }
-     });
+	if (document.getElementById('check'+pk).checked) {
+		var value = '1';
+		document.getElementById("qty"+pk).disabled = true;
+		$.ajax({
+		   type: "POST",
+		   url: url,
+		   data:
+				{
+					unchecked:value,
+					qty:$("#qty"+pk).val(),
+					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+				},
+		   success: function(data) {
+				
+		   }
+		});
+	}else{
+		document.getElementById("qty"+pk).disabled = false;
+		var value = '0';
+		$.ajax({
+		   type: "POST",
+		   url: url,
+		   data:
+				{
+					unchecked:value,
+					qty:$("#qty"+pk).val(),
+					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+				},
+		   success: function(data) {
+				
+		   }
+		});
+	}
 }
 
 </script>

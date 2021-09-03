@@ -16,18 +16,24 @@
 
     {% for orderitem in order.fedorderitem_set.all %}
       <div>
-	  <div id="orderdetail"><img width="100" height="100" src="{{ orderitem.product.prod_img.url }}" alt="{{ order.product.prod_name }}" class="img-fluid img-thumbnail"></div>
-      <div id="orderdetail"><div>produit : {{ orderitem.product.prod_name }}</div>
+      <div>
+	  <div class="orderdetail"><img width="50" height="50" src="{{ orderitem.product.prod_img.url }}" alt="{{ order.product.prod_name }}" class="img-fluid img-thumbnail"></div>
+      <div class="text"><div >produit : {{ orderitem.product.prod_name }} </div>
+      <div class="orderdetail"><div>Quantité commandée : {{ orderitem.qty }}</div>
 	  <div>
 	  <form action="{% url 'fed-orderitem-update' order.id %}" method="POST">
 	  {% csrf_token %}
-	  <input onchange="UpdateQty({{ orderitem.id }})" type="number" name="qty" id="qty{{ orderitem.id }}" maxlength="100" class="form-control" value="{{ orderitem.qty }}"> 
-	  </form>
-	  </div></div></div>
+	  <label> quantité fournis : 
+	  <input {% if orderitem.delivered %} disabled {% endif %} min=0  type="number" name="qty" id="qty{{ orderitem.id }}" maxlength="100" class="form-control qty" value="{{ orderitem.qty_supplied }}"> 
+	  <input type="checkbox" class="form-control check" id="check{{ orderitem.id }}" name="delivered" value ="{{orderitem.delivered}}" 
+			onClick="UpdateQty({{ orderitem.id }})" {% if orderitem.delivered %} checked {% endif %} {% if orderitem.delivered and order.status == "PARTIEL" %}disabled{% endif %}>
+	  </label></form>
+	  </div></div></div></div></div>
 
    {% endfor %}
    <br>
-	<a id="btnCloseOrder" class="btn btn-dark" {% if order.status == "OPEN" %}href="{% url 'fed-order-closed' order.id %}" {% endif %}>Clore la commande</a>	
+   <div class="vertical-center">
+	<a id="btnCloseOrder" class="btn btn-dark" {% if order.status == "OPEN" or order.status == "PARTIEL" %}href="{% url 'fed-order-closed' order.id %}" {% endif %}>Sauvegarder</a>	
 			</div>
 		</div>
 	</div>
