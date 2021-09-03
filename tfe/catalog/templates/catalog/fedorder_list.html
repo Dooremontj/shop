@@ -15,6 +15,7 @@
 				{% if request.user|has_group:"Shop Members" %}
 				<th scope="col"></th>
 				<th scope="col"></th>
+				<th scope="col"></th>
 				{% endif %} 
 			</tr>
 		</thead>
@@ -30,6 +31,10 @@
 				</td>
 				<td ><a href=# onclick="getOrderUpdate({{ order.id }})" class="fa fa-pencil" >
 				<img src="/static/media/icon/open.png " alt="{{ order.title }}">
+				</a></td>
+				
+				<td ><a href="{% url 'print' order.id %}" target="_blank" class="fa fa-pencil" >
+				<img src="/static/media/icon/print.png " alt="{{ order.title }}">
 				</a></td>
 				{% endif %} 
 			</tr>

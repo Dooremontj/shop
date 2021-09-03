@@ -27,7 +27,10 @@ def index(request):
 ################################################################################################
 #products
 ################################################################################################
-
+def PrintOrder(request,pk):
+    fedorder = get_object_or_404(FedOrder, pk=pk)
+    return render(request,'catalog/printable_order.html', {'fedorder':fedorder,})
+    
 class ProductListView(generic.ListView):
     model = Product
     

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+<style>
+{% load static %}  
+@media print
+{
+  table { page-break-after:auto }
+  tr    { page-break-inside:avoid; page-break-after:auto }
+  td    { page-break-inside:avoid; page-break-after:auto }
+  thead { display:table-header-group }
+  tfoot { display:table-footer-group }
+}
+</style>
+<script type="text/javascript">
+window.print();
+window.onafterprint =function(){ window.close();}
+</script>
+<link rel="stylesheet"  type="text/css" href="{% static 'css/print.css'  %}"/>
+	</head>
+	<body >
+		<header>Shop AMC</header>
+<main role="main" class="container">
+<h2>Nom de la commande : {{ fedorder.title }}</h2>
+<h2>Commandé par : {{ fedorder.order_user }}</h2>
+<table>
+		<thead>
+			<tr>
+				<th scope="col">Produit</th>
+				<th scope="col">Quantité commandé</th>
+				<th scope="col">Quantité fournis</th>
+				 
+			</tr>
+		</thead>
+		<tbody>
+    {% for orderitem in fedorder.fedorderitem_set.all %}
+	<tr>
+      <td><div>{{ orderitem.product.prod_name }}</td>
+	  <td>{{ orderitem.qty }}</td>
+	  <td><strong></strong> </td>
+	</tr>
+   {% endfor %}
+   		</tbody>
+	</table>
+
+
+ 	
+</main>
+<br>
+<footer>&copy; Fedasil</footer>
+
+{% block jscript %}{% endblock %}
+</body>
+</html>
