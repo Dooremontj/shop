@@ -19,6 +19,7 @@ from django.core import serializers
 from django.contrib import messages
 import datetime
 from django.contrib.auth.decorators import permission_required
+from django.contrib.auth import authenticate, login
 from django.db.models import Q, F
 from django.utils import formats
 
@@ -391,21 +392,27 @@ def FedOrderClose(request, pk):
     nbitem = FedOrderItem.objects.filter(order = instance).count()
     count = 0
     orderin = 0
+    error = []
+    can_save = True
     for f in fedorderitem:
-        orderin += 1
-        if f.already_delivered :
-            count += 1
         if f.delivered and not f.already_delivered :
             instance_product = get_object_or_404(Product, pk = f.product.pk)
-            if instance_product.prod_stock > f.qty_supplied :
-                instance_product.prod_stock = instance_product.prod_stock-f.qty_supplied
-                instance_product.save()
-                f.already_delivered = True
-                f.save()
+            if instance_product.prod_stock < f.qty_supplied :
+                error.append('Le produit : "'+instance_product.prod_name+"\" n'a plus que : "+ str(instance_product.prod_stock) +" en stock")
+                can_save = False
+    if can_save:
+        for f in fedorderitem:
+            orderin += 1
+            if f.already_delivered :
                 count += 1
-    print(count, os.getcwd())
-    print(nbitem, os.getcwd())
-    print(orderin, os.getcwd())
+            if f.delivered and not f.already_delivered :
+                instance_product = get_object_or_404(Product, pk = f.product.pk)
+                if instance_product.prod_stock > f.qty_supplied :
+                    instance_product.prod_stock = instance_product.prod_stock-f.qty_supplied
+                    instance_product.save()
+                    f.already_delivered = True
+                    f.save()
+                    count += 1
     if count != 0 :
         if count == orderin :
             instance.status = "CLOSED"
@@ -414,7 +421,10 @@ def FedOrderClose(request, pk):
         instance.prepared_by = request.user
         instance.save()
     fedorder_list = FedOrder.objects.all()
-    return HttpResponseRedirect(reverse('fed-orders'))
+    responseData = {
+        'error': error,
+    }
+    return JsonResponse(responseData)
 
 # @permission_required('catalog.can_close_order')
 # def FedOrderPartiel(request, pk):
@@ -660,16 +670,16 @@ class ResidentAutocomplete(autocomplete.Select2QuerySetView):
 
     
 def register_request(request):
-	if request.method == "POST":
-		form = NewUserForm(request.POST)
-		if form.is_valid():
-			user = form.save()
-			login(request, user)
-			messages.success(request, "Registration successful." )
-			return HttpResponseRedirect(reverse('products'))
-		form.add_error(None,request, "Unsuccessful registration. Invalid information.")
-	form = NewUserForm()
-	return render (request=request, template_name="register.html", context={"form":form})
+    form = NewUserForm()
+    if request.method == "POST":
+        form = NewUserForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, "Registration successful." )
+            return HttpResponseRedirect(reverse('products'))
+        form.add_error(None, "Unsuccessful registration. Invalid information.")
+    return render (request=request, template_name="register.html", context={"form":form})
    
 # def email_new_order(request):
     # users = User.objects.filter(groups__name='Shop Members')

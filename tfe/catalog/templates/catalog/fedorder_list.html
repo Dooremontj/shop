@@ -204,8 +204,7 @@ var url ="{% url 'fed-orderitem-update' 0 %}".replace('0', pk);
 					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
 				},
 		   success: function(data) {
-				
-		   }
+			}
 		});
 	}else{
 		document.getElementById("qty"+pk).disabled = false;
@@ -220,10 +219,39 @@ var url ="{% url 'fed-orderitem-update' 0 %}".replace('0', pk);
 					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
 				},
 		   success: function(data) {
-				
+
 		   }
 		});
 	}
+}
+
+function validateBasket(pk) {
+var url ="{% url 'fed-order-closed' 0 %}".replace('0', pk);
+		$.ajax({
+		   type: "POST",
+		   url: url,
+		   data:
+				{
+					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+				},
+		   success: function(data) {
+				if (!data['error'].length){
+				$(location).attr('href', "{% url 'fed-orders' %}")
+			}
+			else {
+				console.log(data);
+				document.getElementById("error").innerHTML += "",
+				$('.errors').remove();
+				$.each(data['error'], function(index, value) {
+					var p = document.createElement("p");
+					p.className = "errors";
+					p.innerHTML += value;
+					document.getElementById("error").appendChild(p);
+				});
+			}
+		   }
+		});
+	
 }
 
 </script>

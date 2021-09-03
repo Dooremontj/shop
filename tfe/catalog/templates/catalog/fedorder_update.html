@@ -31,10 +31,10 @@
 	  </div></div></div></div></div>
 
    {% endfor %}
- 
+ <p id="error" class="errorform"></p>
    <br>
    <div class="vertical-center">
-	<a id="btnCloseOrder" class="btn btn-dark" {% if order.status == "OPEN" or order.status == "PARTIEL" %}href="{% url 'fed-order-closed' order.id %}" {% endif %}>Sauvegarder</a>	
+	<a id="btnCloseOrder" class="btn btn-dark" {% if order.status == "OPEN" or order.status == "PARTIEL" %}onclick="validateBasket({{ order.id }})"  {% endif %}>Sauvegarder</a>	
 			</div>
 		</div>
 	</div>
