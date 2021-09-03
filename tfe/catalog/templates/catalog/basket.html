@@ -5,13 +5,14 @@
 {% block content %}
 
   {% if product_list %}
+   
   	<td>
 	<a style="float: left;" href="{%url 'basket-delete' %}" class="fa fa-pencil" >
 	<img src="/static/media/icon/delete.png " alt="Delete">
 	</a>
 	</td>
-		<td><a style="float: right;" href="{%url 'basket-convert' %}" class="fa fa-pencil" >
-		<img src="/static/media/icon/valid.png " alt="Delete">
+		<td><a style="float: right;" onclick="basketConvert()" href=# class="fa fa-pencil" >
+		<img src="/static/media/icon/valid.png " alt="validate">
 		</a></td>
 <table class="datatable table table-striped" id="Basket" >
 	<thead>
@@ -54,6 +55,11 @@
   {% endfor %}
 	</tbody>
 </table>
+<p id="error" class="errorform"></p>
+	<div class="form-group">
+    <label for="commentary">Commentaire</label>
+    <textarea class="form-control" id="commentary" rows="3"></textarea>
+  </div>
   {% else %}
 <p>Votre panier est vide.</p>
   {% endif %}
@@ -121,6 +127,35 @@ var url ="{% url 'product-add-one' 0 %}".replace('0', pk);
 				$("#qty_asked"+pk).text(number+1)
 
 			}
+		 });
+}
+
+function basketConvert(){
+var url ="{% url 'basket-convert' %}";
+var p = document.getElementById('commentary').value;
+	  $.ajax({
+		   type: "POST",
+		   url: url,
+		   data:
+				{
+					commentary:p,
+					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+				},
+		   success: function(data) {
+			if (!data['error'].length){
+				$(location).attr('href', "{% url 'basket' %}")
+			}
+			else {
+				document.getElementById("error").innerHTML += "",
+				$('.errors').remove();
+				$.each(data['error'], function(index, value) {
+					var p = document.createElement("p");
+					p.className = "errors";
+					p.innerHTML += value;
+					document.getElementById("error").appendChild(p);
+				});
+			}
+		   }
 		 });
 }
 

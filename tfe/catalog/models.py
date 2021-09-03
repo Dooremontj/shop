@@ -228,6 +228,7 @@ class FedOrder (GenericOrder):
 		choices = STATUS_CHOICE,
 		default = 'OPEN', verbose_name="Status de la commande"
 		)
+    commentary = models.TextField(verbose_name="Commentaire", default="", blank=True)
 
     class Meta:
         verbose_name = "Commande - membre du personnel"

@@ -247,22 +247,28 @@ def BasketConvert(request):
     product = Product.objects.all()
     order_list = Basket.objects.filter(user_basket=request.user)
     can_save = True
+    error = []
     for p in order_list :
         product = get_object_or_404(Product, pk=p.product.pk)
         if p.qty > product.prod_stock:
-            p.error = "Stock insuffisant - Stock restant :"+ str(product.prod_stock)
+            error.append("Stock insuffisant - Stock restant :"+ str(product.prod_stock))
             p.save()
             can_save = False
     if can_save:
         id = FedOrder.objects.latest('id')
         title = "AMC_Fed_"+datetime.datetime.now().strftime ("%d%m%Y")+"_"+str((id.id+1))
-        instance_order = FedOrder(order_user=request.user,title=title)
+        instance_order = FedOrder(order_user=request.user,title=title,commentary=request.POST.get('commentary'))
         instance_order.save()
         for p in order_list :
             instance_item = FedOrderItem(product=p.product,order=instance_order,qty=p.qty, qty_supplied=p.qty)
             instance_item.save()
             p.delete()
-    return HttpResponseRedirect(reverse('basket') )
+        email_new_order('test')
+    responseData = {
+        'error': error,
+    }
+    return JsonResponse(responseData)
+    #return HttpResponseRedirect(reverse('basket') )
  
 def BasketResidentConvert(request, pk):
     product = Product.objects.all()
@@ -681,11 +687,11 @@ def register_request(request):
         form.add_error(None, "Unsuccessful registration. Invalid information.")
     return render (request=request, template_name="register.html", context={"form":form})
    
-# def email_new_order(request):
-    # users = User.objects.filter(groups__name='Shop Members')
-    # for user in users:
-        # subject = 'Nouvelle commande'
-        # message = ' Une nouvelle commande est arrivée'
-        # email_from = settings.EMAIL_HOST_USER
-        # recipient_list = [user.email,]
-        # send_mail( subject, message, email_from, recipient_list )
+def email_new_order(request):
+    users = User.objects.filter(groups__name='Shop Members')
+    for user in users:
+        subject = 'Nouvelle commande'
+        message = ' Une nouvelle commande est arrivée'
+        email_from = settings.EMAIL_HOST_USER
+        recipient_list = [user.email,]
+        send_mail( subject, message, email_from, recipient_list )
