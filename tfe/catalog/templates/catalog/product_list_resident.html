@@ -4,7 +4,7 @@
 {% block title %}Liste des produits{% endblock %}
 {% block content %}
   {% if user_basket %}
-  
+  <!--<a id="btnCreate" class="btn btn-dark" href="{% url 'order-create' %} ">INLINE FORMS</a>-->
   <div class="form-group mb-2" id="CartResident" >
   <a  href='#' onclick="getBasketResidentDetail()" class="fa fa-pencil" >
 	<img src="/static/media/icon/cart.png" alt="Panier">

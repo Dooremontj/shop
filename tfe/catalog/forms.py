@@ -188,16 +188,7 @@ class NewUserForm(UserCreationForm):
         return user
 
 class RestockProductForm(forms.Form):
-    qty_in = forms.IntegerField(help_text="Entrez le stock réceptionné")
+    qty_in = forms.IntegerField(min_value=1, help_text="Entrez le stock réceptionné")
 
-    # def clean(self):
-        # data = self.cleaned_data['qty_in']
-        
-        # if data == 0:
-            # raise ValidationError(_('la quantité est nulle'))
-
-        # if data < 0:
-            # raise ValidationError(_('La quantité ne peut pas être inférieur à 0'))
-
-        # return data
+    
     

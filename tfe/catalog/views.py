@@ -27,12 +27,10 @@ def index(request):
 	return render(request, 'index.html')
 
 def ConsommationView(request):
-    prout = 'prout'
     dict = {}
     op = "TOUS"
     if request.method == 'POST':
         op = request.POST.get('option')
-        prout = 'proutIf'
         start_week= datetime.datetime.strptime(request.POST.get('startDate'), '%Y-%m-%d')
         end_week =datetime.datetime.strptime(request.POST.get('endDate'), '%Y-%m-%d')
         orderResident = Order.objects.filter(date__range=[start_week, end_week])
@@ -49,7 +47,6 @@ def ConsommationView(request):
                 else :
                     dict[o.product.prod_name] = o.qty
         elif  op == 'PERSONNEL':
-            prout = 'proutPRO'
             for o in orderitemFed :
                 if o.product.prod_name in dict :
                     value = dict.get(o.product.prod_name)
@@ -58,7 +55,6 @@ def ConsommationView(request):
                 else :
                     dict[o.product.prod_name] = o.qty
         else : 
-            prout = 'proutALL'
             for o in orderitemResident :
                 if o.product.prod_name in dict :
                     value = dict.get(o.product.prod_name)
@@ -73,14 +69,13 @@ def ConsommationView(request):
                     dict[o.product.prod_name] = value
                 else :
                     dict[o.product.prod_name] = o.qty
-    else :
-        prout = 'proutElse'    
+    else :  
         date = datetime.date.today()
         start_week = date - datetime.timedelta(date.weekday())
         end_week = start_week + datetime.timedelta(7)
         orderResident = Order.objects.filter(date__range=[start_week, end_week])
         orderFed = FedOrder.objects.filter(date__range=[start_week, end_week])
-    return render(request, 'catalog/consommation.html', {'start_week':start_week,'end_week' : end_week,'op':op, 'dict':dict, 'prout':prout})
+    return render(request, 'catalog/consommation.html', {'start_week':start_week,'end_week' : end_week,'op':op, 'dict':dict})
 ################################################################################################
 #products
 ################################################################################################
@@ -168,16 +163,12 @@ class ProductAutocomplete(autocomplete.Select2QuerySetView):
         
 def ProductRestock(request, pk):
     instance=get_object_or_404(Product, pk = pk)
-
     if request.method == 'POST':
-
         form = RestockProductForm(request.POST)
-
         if form.is_valid():
             instance.prod_stock += form.cleaned_data['qty_in']
             instance.save()
             return HttpResponseRedirect(reverse('products') )
-
     else:
         min = 1
         form = RestockProductForm(initial={'qty_in': min,})
@@ -263,7 +254,7 @@ def BasketConvert(request):
             instance_item = FedOrderItem(product=p.product,order=instance_order,qty=p.qty, qty_supplied=p.qty)
             instance_item.save()
             p.delete()
-        email_new_order('test')
+        email_new_order(instance_order)
     responseData = {
         'error': error,
     }
@@ -663,15 +654,11 @@ def OrderLastID(request):
         
 class ResidentAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        # Don't forget to filter out results depending on the visitor !
         if not self.request.user.is_authenticated:
            return Resident.objects.none()
-
         qs = Resident.objects.all()
-
         if self.q:
             qs = qs.filter(badge__istartswith=self.q)
-
         return qs
 
     
@@ -687,11 +674,11 @@ def register_request(request):
         form.add_error(None, "Unsuccessful registration. Invalid information.")
     return render (request=request, template_name="register.html", context={"form":form})
    
-def email_new_order(request):
-    users = User.objects.filter(groups__name='Shop Members')
-    for user in users:
-        subject = 'Nouvelle commande'
-        message = ' Une nouvelle commande est arrivée'
-        email_from = settings.EMAIL_HOST_USER
-        recipient_list = [user.email,]
-        send_mail( subject, message, email_from, recipient_list )
+# def email_new_order(request):
+    # users = User.objects.filter(groups__name='Shop Members')
+    # for user in users:
+        # subject = 'Nouvelle commande'
+        # message = ' Une nouvelle commande est arrivée'
+        # email_from = settings.EMAIL_HOST_USER
+        # recipient_list = [user.email,]
+        # send_mail( subject, message, email_from, recipient_list )

@@ -26,7 +26,7 @@
 	  <label> quantité fournis : 
 	  <input {% if orderitem.delivered %} disabled {% endif %} min=0  type="number" name="qty" id="qty{{ orderitem.id }}" maxlength="100" class="form-control qty" value="{{ orderitem.qty_supplied }}"> 
 	  <input type="checkbox" class="form-control check" id="check{{ orderitem.id }}" name="delivered" value ="{{orderitem.delivered}}" 
-			onClick="UpdateQty({{ orderitem.id }})" {% if orderitem.delivered %} checked {% endif %} {% if orderitem.delivered and order.status == "PARTIEL" %}disabled{% endif %}>
+			onClick="UpdateQty({{ orderitem.id }})" {% if orderitem.delivered %} checked {% endif %} {% if orderitem.delivered and order.status == "PARTIEL" %}disabled{% endif %}>Traiter
 	  </label></form>
 	  </div></div></div></div></div>
 

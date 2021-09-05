@@ -5,17 +5,19 @@
         aria-labelledby="modalProdRestock" aria-hidden="true"
          data-keyboard="false" data-dismiss="modal">
 	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-			<p>Produit : {{product.prod_name}}</p>
+		<div class="modal-content"style="text-align:center;">
+			<p><strong>Produit : {{product.prod_name}}</strong></p>
 			<p>Stock : {{product.prod_stock}}</p>
 
 			<form action="{% url 'product-restock' product.id %}" method="post">
-			  <div class="form-group">
+			  <div class="form-group" >
  {% csrf_token %}
-				<table>
+				<table style="margin: 0 auto;">
  {{ form }}
 				</table>
+				<div  >
 				<input class="btn btn-success" type="submit" value="Valider" />
+				</div>
 				</div>
 			</form>
 		</div>

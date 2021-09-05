@@ -4,19 +4,14 @@
 	<link rel="shortcut icon" href="#" />
     {% load static %}  
 		<title>{% block title %}Shop Fedasil{% endblock %}</title>
-				{% block link %} 
+		{% block link %} 
 			<link rel="stylesheet"  type="text/css" href="{% static 'css/style.css'  %}"/>
 		{% endblock %}
-		
 		{% load bootstrap4 %}
 		{# Load CSS and JavaScript #}
 		{% bootstrap_css %}
-		
-		{% bootstrap_javascript jquery='full' %}
-	
-		{% block jscripts %}
-		 
-
+		{% bootstrap_javascript jquery='full' %}	
+		{% block jscripts %} 
 		{% endblock %}
 		{% load auth_extras %}
 	</head>
