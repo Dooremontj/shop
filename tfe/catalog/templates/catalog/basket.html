@@ -24,7 +24,7 @@
 	</thead>
 	<tbody id="myTable">
   {% for product in product_list %}
-		<tr>
+		<tr id="{{ product.id }}">
 			<td scope="row w-25" >
 				<img width="100" height="100" src="{{ product.product.prod_img.url }} " alt="{{ product.product.prod_name }}" class="img-fluid img-thumbnail">
 				</td>
@@ -92,6 +92,8 @@ var url ="{% url 'product-detail' 0 %}".replace('0', pk);
 
 function RemoveOneToBasket(pk,qty_asked) {
 var url ="{% url 'product-remove-one' 0 %}".replace('0', pk);
+document.getElementById("error").innerHTML += "";
+$('.errors').remove();
 	  $.ajax({
 		   type: "POST",
 		   url: url,
@@ -113,6 +115,8 @@ var url ="{% url 'product-remove-one' 0 %}".replace('0', pk);
 
 function AddOneToBasket(pk,qty_asked) {
 var url ="{% url 'product-add-one' 0 %}".replace('0', pk);
+document.getElementById("error").innerHTML += "";
+$('.errors').remove();
 	  $.ajax({
 		   type: "POST",
 		   url: url,
@@ -121,10 +125,21 @@ var url ="{% url 'product-add-one' 0 %}".replace('0', pk);
 					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
 				},
 		   success: function(data) {
-				var p = document.getElementById('qty_asked'+pk);
-				var text = p.textContent;
-				var number = Number(text);
-				$("#qty_asked"+pk).text(number+1)
+				if (!data['error'].length){
+					var p = document.getElementById('qty_asked'+pk);
+					var text = p.textContent;
+					var number = Number(text);
+					$("#qty_asked"+pk).text(number+1)
+				} else {
+					document.getElementById("error").innerHTML += "",
+					$('.errors').remove();
+					$.each(data['error'], function(index, value) {
+						var p = document.createElement("p");
+						p.className = "errors";
+						p.innerHTML += value;
+						document.getElementById("error").appendChild(p);
+					});
+				}
 
 			}
 		 });

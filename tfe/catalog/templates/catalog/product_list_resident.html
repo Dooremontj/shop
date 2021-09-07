@@ -79,7 +79,11 @@
 
 $(document).ready(function(){
   $("#selResident").select2();
-  $('#ShopList').DataTable();
+  $('#ShopList').DataTable({
+		"columnDefs": [
+			{ "targets": [0,2,3,4,5], "searchable": false }
+		]
+	});
   $('[data-toggle="popover"]').popover({
         placement: 'bottom',
         delay: {
@@ -158,16 +162,33 @@ var qty_asked =$("#qty"+pk).val();
 					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
 				},
 		   success: function(data) {
-			   $('[data-toggle="popover"]').attr('data-content','Le produit : '+prod+' a été ajouté au panier');
-			   $('[data-toggle="popover"]').attr('data-original-title','Panier');
-			   $('[data-toggle="popover"][data-timeout]').on('shown.bs.popover', function() {
-					this_popover = $(this);
-					$('.popover-header').css("color", "#000000");
-					$('.popover-body').css("color", "#000000");
-					setTimeout(function () {
-						this_popover.popover('hide');
-					}, $(this).data("timeout"));
-				});
+			   if (!data['error'].length){
+				   $('[data-toggle="popover"]').attr('data-content','Le produit : '+prod+' a été ajouté au panier');
+				   $('[data-toggle="popover"]').attr('data-original-title','Panier');
+				   $('[data-toggle="popover"][data-timeout]').on('shown.bs.popover', function() {
+						this_popover = $(this);
+						$('.popover-header').css("color", "#000000");
+						$('.popover-body').css("color", "#000000");
+						setTimeout(function () {
+							this_popover.popover('hide');
+						}, $(this).data("timeout"));
+					});
+				} else { 
+					$.each(data['error'], function(index, value) {
+						$('[data-toggle="popover"]').attr('data-content',value);
+					$('[data-toggle="popover"]').attr('data-original-title','Alerte');
+					$('[data-toggle="popover"][data-timeout]').on('shown.bs.popover', function() {
+						this_popover = $(this);
+						$('.popover-header').css("color", "#ff0000");
+						$('.popover-body').css("color", "#ff0000");
+						setTimeout(function () {
+							this_popover.popover('hide');
+						}, $(this).data("timeout"));
+					});
+					});
+					
+		
+				}
 			}
 		 });
 	} else {
@@ -187,6 +208,8 @@ var qty_asked =$("#qty"+pk).val();
 
 function RemoveOneToBasket(pk,qty_asked,points,point,total) {
 var url ="{% url 'basketresident-remove-one' 0 %}".replace('0', pk);
+document.getElementById("error").innerHTML += "";
+$('.errors').remove();
 	  $.ajax({
 		   type: "POST",
 		   url: url,
@@ -200,13 +223,17 @@ var url ="{% url 'basketresident-remove-one' 0 %}".replace('0', pk);
 				var number = Number(text);
 				$("#qty_asked"+pk).text(number-1);
 				if (number-1 === 0){
-					console.log("zero");
 					document.getElementById(pk).style.display = "none";
 					p = document.getElementById('totalpoints');
 					text = p.textContent.replace( /^\D+/g, '');;
 					number = Number(text);
 					var newtotal = number-point
 					$("#totalpoints").text('Total de points de la commande : '+newtotal)
+					p = document.getElementById('pointrestant');
+					text = p.textContent.replace( /^\D+/g, '');
+					number = Number(text);
+					var newrestant = number+point
+					$("#pointrestant").text('Points restant après commande : '+newrestant)
 				} else {
 					p = document.getElementById('points'+pk);
 					text = p.textContent;
@@ -217,6 +244,11 @@ var url ="{% url 'basketresident-remove-one' 0 %}".replace('0', pk);
 					number = Number(text);
 					var newtotal = number-point
 					$("#totalpoints").text('Total de points de la commande : '+newtotal)
+					p = document.getElementById('pointrestant');
+					text = p.textContent.replace( /^\D+/g, '');
+					number = Number(text);
+					var newrestant = number+point
+					$("#pointrestant").text('Points restant après commande : '+newrestant)
 				}
 			}
 		 });
@@ -224,6 +256,8 @@ var url ="{% url 'basketresident-remove-one' 0 %}".replace('0', pk);
 
 function AddOneToBasket(pk,qty_asked,points,point,total) {
 var url ="{% url 'basketresident-add-one' 0 %}".replace('0', pk);
+document.getElementById("error").innerHTML += "";
+$('.errors').remove();
 	  $.ajax({
 		   type: "POST",
 		   url: url,
@@ -232,6 +266,7 @@ var url ="{% url 'basketresident-add-one' 0 %}".replace('0', pk);
 					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
 				},
 		   success: function(data) {
+		   if (!data['error'].length){
 				var p = document.getElementById('qty_asked'+pk);
 				var text = p.textContent;
 				var number = Number(text);
@@ -245,6 +280,24 @@ var url ="{% url 'basketresident-add-one' 0 %}".replace('0', pk);
 				number = Number(text);
 				var newtotal = number+point
 				$("#totalpoints").text('Total de points de la commande : '+newtotal)
+				p = document.getElementById('pointrestant');
+				text = p.textContent.replace( /^\D+/g, '');
+				number = Number(text);
+				var newrestant = number-point
+				$("#pointrestant").text('Points restant après commande : '+newrestant)
+			}
+			else {
+				document.getElementById("error").innerHTML += "",
+				$('.errors').remove();
+				$.each(data['error'], function(index, value) {
+					var p = document.createElement("p");
+					p.className = "errors";
+					p.innerHTML += value;
+					document.getElementById("error").appendChild(p);
+				});
+			}
+				
+
 			}
 		 });
 }
@@ -306,7 +359,6 @@ if (checked){
 				$(location).attr('href', "{% url 'orders' %}")
 			}
 			else {
-				console.log(data);
 				document.getElementById("error").innerHTML += "",
 				$('.errors').remove();
 				$.each(data['error'], function(index, value) {

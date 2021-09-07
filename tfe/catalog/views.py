@@ -182,29 +182,51 @@ def ProductRestock(request, pk):
 
 def AddBasket(request,pk):
     if request.method == 'POST':
+        error = []
         productselected = get_object_or_404(Product, pk=pk)
         if Basket.objects.filter(product=productselected, user_basket=request.user).exists():
             instancebasket = get_object_or_404(Basket, product=productselected, user_basket=request.user)
-            instancebasket.qty += int(request.POST.get('qty'))
-            instancebasket.save()
+            qty = instancebasket.qty + int(request.POST.get('qty'))
+            if qty <= productselected.prod_stock:
+                instancebasket.qty += int(request.POST.get('qty'))
+                instancebasket.save()
+            else:
+                qtymax = productselected.prod_stock - instancebasket.qty
+                error.append("quantité maximum ajoutable : " + str(qtymax))
         else:
             instance = Basket(product=productselected , qty=request.POST.get('qty') , user_basket=request.user)
             instance.save()
-    return HttpResponseRedirect(reverse('product-shop') )
+        responseData = {
+            'error': error,
+        }
+        return JsonResponse(responseData)
+    else :
+        return HttpResponseRedirect(reverse('product-shop') )
     
 def AddBasketResident(request,pk):
     if request.method == 'POST':
+        error = []
         productselected = get_object_or_404(Product, pk=pk)
         residentselected =  get_object_or_404(Resident, pk=request.POST.get('user_basket'))
         if BasketResident.objects.filter(product=productselected, user_basket=residentselected).exists():
             instancebasket = get_object_or_404(BasketResident, product=productselected, user_basket=residentselected)
-            instancebasket.qty += int(request.POST.get('qty'))
-            instancebasket.points = instancebasket.qty*productselected.prod_limit
-            instancebasket.save()
+            qty = instancebasket.qty + int(request.POST.get('qty'))
+            if qty <= productselected.prod_stock:
+                instancebasket.qty += int(request.POST.get('qty'))
+                instancebasket.points = instancebasket.qty*productselected.prod_limit
+                instancebasket.save()
+            else:
+                qtymax = productselected.prod_stock - instancebasket.qty
+                error.append("quantité maximum ajoutable : " + str(qtymax))
         else:
             instance = BasketResident(product=productselected , qty=request.POST.get('qty') , user_basket=residentselected, points=int(request.POST.get('qty'))*productselected.prod_limit)
             instance.save()
-    return HttpResponseRedirect(reverse('product-shop') )
+        responseData = {
+            'error': error,
+        }
+        return JsonResponse(responseData)
+    else :
+        return HttpResponseRedirect(reverse('product-shop') )
     
 def BasketListView(request):
     product_list = Basket.objects.filter(user_basket=request.user)
@@ -216,10 +238,25 @@ def BasketResidentListView(request,pk):
     for p in product_list :
         points += p.product.prod_limit * p.qty
     instance = get_object_or_404(Resident, pk=pk)
+    date = datetime.date.today()
+    start_week = date - datetime.timedelta(date.weekday())
+    end_week = start_week + datetime.timedelta(7)
+    family = Resident.objects.filter(badge=instance.badge)
+    pklist = []
+    for f in family:
+        pklist.append(f.id)
+    entries = Order.objects.filter(date__range=[start_week, end_week], order_user__in=pklist)
+    pointrestant =0
+    
+    for p in entries :
+        pointrestant += p.points
     family = Resident.objects.filter(badge=instance.badge)
     familynumber = family.count()
     user_points = get_object_or_404(LimitFamily, compo_family=str(familynumber)).point_by_week
-    return render(request,'catalog/basket_resident_detail.html', {'product_list':product_list, 'points':points, 'user_points':user_points, 'resident':instance,})
+    pointrestant = user_points - pointrestant
+    ptwithorder = pointrestant - points
+    
+    return render(request,'catalog/basket_resident_detail.html', {'product_list':product_list, 'points':points, 'user_points':user_points, 'resident':instance,'pointrestant':pointrestant,'ptwithorder':ptwithorder})
     
 def BasketDelete(request):
     product_list = Basket.objects.filter(user_basket=request.user)
@@ -245,6 +282,10 @@ def BasketConvert(request):
             error.append("Stock insuffisant - Stock restant :"+ str(product.prod_stock))
             p.save()
             can_save = False
+    if not Basket.objects.filter(user_basket=request.user).exists() : 
+        error.append("panier vide")
+        can_save = False
+        
     if can_save:
         id = FedOrder.objects.latest('id')
         title = "AMC_Fed_"+datetime.datetime.now().strftime ("%d%m%Y")+"_"+str((id.id+1))
@@ -298,7 +339,9 @@ def BasketResidentConvert(request, pk):
             error.append("limite de point dépassé, point restant :" + str(restant))
             can_save = False
        
-    
+    if not BasketResident.objects.filter(user_basket=instance).exists() : 
+        error.append("panier vide")
+        can_save = False
     if can_save:
        
         #for p in order_list :
@@ -322,18 +365,32 @@ def BasketResidentConvert(request, pk):
 
 def ProductAddOne(request, pk):
     instance=get_object_or_404(Basket, pk = pk)
+    error = []
     if request.method == 'POST':
+        if instance.qty+1 <= instance.product.prod_stock :
             instance.qty += 1
             instance.save()
-    return HttpResponseRedirect(reverse('basket') )
+        else:
+            error.append('La quantité de : '+ instance.product.prod_name +' est égale à la quantité en stock')
+    responseData = {
+        'error': error,
+    }
+    return JsonResponse(responseData)            
 
 def BasketResidentAddOne(request, pk):
     instance=get_object_or_404(BasketResident, pk = pk)
+    error = []
     if request.method == 'POST':
+        if instance.qty+1 <= instance.product.prod_stock :
             instance.qty += 1
             instance.points = instance.qty*instance.product.prod_limit
             instance.save()
-    return HttpResponseRedirect(reverse('orders') )
+        else :
+            error.append('La quantité de : '+ instance.product.prod_name +' est égale à la quantité en stock')
+    responseData = {
+        'error': error,
+    }
+    return JsonResponse(responseData)
     
 def BasketResidentRemoveOne(request, pk):
     instance=get_object_or_404(BasketResident, pk = pk)

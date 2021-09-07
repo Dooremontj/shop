@@ -65,7 +65,11 @@
 
 
 $(document).ready(function() {
-    $('#ShopList').DataTable();
+    $('#ShopList').DataTable({
+		"columnDefs": [
+			{ "targets": [0,2,3,4], "searchable": false }
+		]
+	});
 	$('[data-toggle="popover"]').popover({
         placement: 'bottom',
         delay: {
@@ -117,16 +121,31 @@ var prod_name =$("#productname"+pk).val();
 					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
 				},
 		   success: function(data) {
-			   $('[data-toggle="popover"]').attr('data-content','Le produit : '+prod_name+' a été ajouté au panier');
-			   $('[data-toggle="popover"]').attr('data-original-title','Panier');
-			   $('[data-toggle="popover"][data-timeout]').on('shown.bs.popover', function() {
-					this_popover = $(this);
-					$('.popover-header').css("color", "#000000");
-					$('.popover-body').css("color", "#000000");
-					setTimeout(function () {
-						this_popover.popover('hide');
-					}, $(this).data("timeout"));
-				});
+				if (!data['error'].length){
+					   $('[data-toggle="popover"]').attr('data-content','Le produit : '+prod_name+' a été ajouté au panier');
+					   $('[data-toggle="popover"]').attr('data-original-title','Panier');
+					   $('[data-toggle="popover"][data-timeout]').on('shown.bs.popover', function() {
+							this_popover = $(this);
+							$('.popover-header').css("color", "#000000");
+							$('.popover-body').css("color", "#000000");
+							setTimeout(function () {
+								this_popover.popover('hide');
+							}, $(this).data("timeout"));
+						});
+				} else {
+					$.each(data['error'], function(index, value) {
+						$('[data-toggle="popover"]').attr('data-content',value);
+						$('[data-toggle="popover"]').attr('data-original-title','Alerte');
+						$('[data-toggle="popover"][data-timeout]').on('shown.bs.popover', function() {
+							this_popover = $(this);
+							$('.popover-header').css("color", "#ff0000");
+							$('.popover-body').css("color", "#ff0000");
+							setTimeout(function () {
+								this_popover.popover('hide');
+								}, $(this).data("timeout"));
+						});
+					});
+				}
 			}
 		 });
 	} else {
