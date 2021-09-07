@@ -322,26 +322,31 @@ def BasketResidentConvert(request, pk):
     pts=0
     can_save = True
     error = []
-    for p in order_list :
-        pts += p.product.prod_limit * p.qty
-        if p.qty > p.product.prod_stock:
-            error.append("Stock insuffisant de : "+p.product.prod_name +" - Stock restant :"+ str(p.product.prod_stock))
-            p.save()
-            can_save = False
-            
-    if verifpoint:       
-        instance = get_object_or_404(Resident, pk=pk)
-        family = Resident.objects.filter(badge=instance.badge)
-        familynumber = family.count()
-        user_points = get_object_or_404(LimitFamily, compo_family=str(familynumber)).point_by_week
-        restant = user_points - point
-        if pts > restant:
-            error.append("limite de point dépassé, point restant :" + str(restant))
-            can_save = False
-       
     if not BasketResident.objects.filter(user_basket=instance).exists() : 
         error.append("panier vide")
         can_save = False
+    else :    
+        for p in order_list :
+            pts += p.product.prod_limit * p.qty
+            if p.qty > p.product.prod_stock:
+                error.append("Stock insuffisant de : "+p.product.prod_name +" - Stock restant :"+ str(p.product.prod_stock))
+                p.save()
+                can_save = False
+                
+        if verifpoint:       
+            instance = get_object_or_404(Resident, pk=pk)
+            family = Resident.objects.filter(badge=instance.badge)
+            familynumber = family.count()
+            user_points = get_object_or_404(LimitFamily, compo_family=str(familynumber)).point_by_week
+            restant = user_points - point
+            if pts > restant:
+                error.append("limite de point dépassé, point restant :" + str(restant))
+                can_save = False
+        else:
+            pts=0
+            
+       
+    
     if can_save:
        
         #for p in order_list :
