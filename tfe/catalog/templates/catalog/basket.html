@@ -158,7 +158,7 @@ var p = document.getElementById('commentary').value;
 				},
 		   success: function(data) {
 			if (!data['error'].length){
-				$(location).attr('href', "{% url 'basket' %}")
+				$(location).attr('href', "{% url 'my-fed-orders' %}")
 			}
 			else {
 				document.getElementById("error").innerHTML += "",

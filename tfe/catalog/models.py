@@ -19,7 +19,7 @@ class Resident(models.Model):
     room = models.IntegerField(verbose_name="Chambre", blank=True)
     #birthdate = models.DateTimeField(max_length=100, verbose_name="Date de naissance", blank=True)
     age = models.IntegerField(verbose_name="Age", blank=True)
-    #datein = models.DateTimeField(max_length=100,verbose_name="Date d'arrivée", blank=True)
+    datein = models.DateTimeField(max_length=100,verbose_name="Date d'arrivée", null=True)
     sexe = models.CharField(max_length=1, verbose_name="Sexe", blank=True)
     
     class Meta:

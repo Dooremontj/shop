@@ -53,6 +53,7 @@ urlpatterns = [
     path('resident/create/', login_required(views.ResidentCreate), name='resident-create'),
     path('resident/<int:pk>', login_required(views.ResidentDetailView.as_view()), name='resident-detail'),
     path('resident/<int:pk>/family', login_required(views.ResidentDetailFamilyView), name='resident-detail-family'),
+    path('resident/<int:pk>/dateint', login_required(views.DateIn), name='resident-date-in'),
     path('resident/<int:pk>/order', login_required(views.ResidentDetailOrderView), name='resident-detail-order'),
     path('resident/<int:pk>/delete/', login_required(views.ResidentDelete.as_view()), name='resident-delete'),
     #supplier
@@ -61,6 +62,9 @@ urlpatterns = [
     path('supplier/create/', login_required(views.SupplierCreate), name='supplier-create'),
     path('supplier/<int:pk>', login_required(views.SupplierDetailView.as_view()), name='supplier-detail'),
     path('supplier/<int:pk>/delete/', login_required(views.SupplierDelete.as_view()), name='supplier-delete'),
+    path('Import/', login_required(views.Import), name='import'),
+    path('Import/add', login_required(views.AddImport), name='add-import-data'),
+    path('Import/delete', login_required(views.DeleteImport), name='delete-import-data'),
     #other
     path('register', views.register_request, name="register"),
     url(

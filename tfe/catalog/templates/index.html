@@ -36,18 +36,10 @@
           <a class="dropdown-item" href="{% url 'suppliers' %}">Fournisseurs</a>
           <a class="dropdown-item" href="{% url 'residents' %}">Residents</a>
           <a class="dropdown-item" href="{% url 'consommation' %}">Consommation</a>
+		  <a class="dropdown-item" href="{% url 'import'%}">Import</a>
         </div>
       </li>
-<!--
-					<li>
-						<a class="nav-link" href="{% url 'products' %}">Produits</a>
-					</li>
-					<li>
-						<a class="nav-link" href="{% url 'suppliers' %}">Fournisseurs</a>
-					</li>
-					<li>
-						<a class="nav-link" href="{% url 'residents' %}">Residents</a>
-					</li> -->
+
 					<li>
 						<a class="nav-link" href="{% url 'orders' %}">Shop-Residents</a>
 					</li>
@@ -75,6 +67,7 @@
 					</li>
 					{% endif %} 
 					<li><a class="nav-link" href="{% url 'logout'%}">Se déconnecter</a></li>
+					
 				{% else %}
 					<li><a class="nav-link" href="{% url 'login'%}?next={{request.path}}">Se connecter</a></li>
 					<li><a class="nav-link" href="{% url 'register'%}">Inscription</a></li>

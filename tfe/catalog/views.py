@@ -22,6 +22,10 @@ from django.contrib.auth.decorators import permission_required
 from django.contrib.auth import authenticate, login
 from django.db.models import Q, F
 from django.utils import formats
+import openpyxl
+from pathlib import Path
+
+LIST_OF_RESIDENT = []
 
 def index(request):
 	return render(request, 'index.html')
@@ -710,9 +714,124 @@ def OrderLastID(request):
 
 
     
-    
-    
+def Import(request) :
 
+    responseData ={}
+    select = ""
+    dict =[]
+    nbdays = 0
+    ListOfResidentJSON =[]
+    # LIST_OF_RESIDENT = []
+    ListOfResident =[]
+    if request.method == 'POST':
+        delete = []
+        select = request.POST.get('AddOrRemove')
+        if select == "Add" :
+            wb_obj = openpyxl.load_workbook(request.FILES['filexlsx'])
+            sheet = wb_obj.active
+            for row in sheet.iter_rows(max_col=9):
+                value = []
+                for cell in row:
+                    if cell.value is None : 
+                        break
+                    elif cell.value == "Badge" or Resident.objects.filter(badge=str(cell.value)+".0").exists():
+                        break
+                    else:
+                        value.append(cell.value)
+                if value:
+                    dict.append(value)
+            for i in dict :
+                resident = Resident(badge=str(i[0])+".0",family_group=i[1],name=i[2],firstname=i[3],room=i[4],age=i[6],datein=i[7],sexe=i[8])
+                # today = datetime.datetime.now()
+                # orig_date = str(resident.datein)
+                # d2 = datetime.datetime.strptime(orig_date, "%Y-%m-%d %H:%M:%S")
+                # d2 = d2.strftime('%Y-%m-%d')
+                # d2 = datetime.datetime.strptime(d2, '%Y-%m-%d')
+                # today = str(today)
+                # d1 = datetime.datetime.strptime(today, "%Y-%m-%d %H:%M:%S.%f")
+                # d1 = d1.strftime('%Y-%m-%d')
+                # d1 = datetime.datetime.strptime(d1, '%Y-%m-%d')
+                # nbdays = d1 - d2
+                serialized_obj = serializers.serialize('json', [resident,])
+                ListOfResidentJSON.append(serialized_obj)
+                ListOfResident.append(resident)
+                # LIST_OF_RESIDENT = ListOfResident
+            request.session['import'] = serializers.serialize('json', ListOfResident)
+            # responseData = {
+                # 'select':select,
+                # 'ListOfResident':ListOfResident,
+                # 'nbdays':nbdays.days
+             # }
+            # for i in line:
+                # delete.append(i+'.0')
+            # Resident.objects.filter(badge__in=delete).delete()
+            return render(request, 'catalog/resident_list.html', {
+                'resident_list': ListOfResident, 'action':select
+            })
+        else :
+            wb_obj = openpyxl.load_workbook(request.FILES['filexlsx'])
+            sheet = wb_obj.active
+            for row in sheet.iter_rows(max_col=2):
+                value = ""
+                for cell in row:
+                    if cell.value is None : 
+                        break
+                    elif cell.value == "Badge" or cell.value in dict:
+                        break
+                    elif Resident.objects.filter(badge=str(cell.value)+".0").exists():
+                        value = str(cell.value)+".0"
+                if value:
+                    dict.append(value)
+            # print(dict)
+            ListOfResident = Resident.objects.filter(badge__in=dict)   
+            request.session['import'] = serializers.serialize('json', ListOfResident)            
+            # responseData = {
+                # 'select':select,
+                # 'ListOfResident':request.session['import'],
+                # # 'nbdays':nbdays.days
+             # }
+        return render(request, 'catalog/resident_list.html', {
+                'resident_list': ListOfResident, 'action':select
+            })
+        
+    else :
+        return render(request, 'catalog/import.html')
+
+def AddImport(request):
+    for obj in serializers.deserialize('json',request.session['import']):
+        obj.object.save()
+    list = request.session['import']
+    del request.session['import']
+    return HttpResponseRedirect(reverse('residents') )
+
+
+def DeleteImport(request):
+    for obj in serializers.deserialize('json',request.session['import']):
+        obj.object.delete()
+    list = request.session['import']
+    del request.session['import']
+    return HttpResponseRedirect(reverse('residents') )
+
+def DateIn(request,pk):
+    resident = get_object_or_404(Resident, pk=pk)
+    if resident.datein is not None:
+        today = datetime.datetime.now()
+        orig_date = str(resident.datein)[:19]
+        d2 = datetime.datetime.strptime(orig_date, "%Y-%m-%d %H:%M:%S")
+        d2 = d2.strftime('%Y-%m-%d')
+        d2 = datetime.datetime.strptime(d2, '%Y-%m-%d')
+        today = str(today)
+        d1 = datetime.datetime.strptime(today, "%Y-%m-%d %H:%M:%S.%f")
+        d1 = d1.strftime('%Y-%m-%d')
+        d1 = datetime.datetime.strptime(d1, '%Y-%m-%d')
+        days = d1 - d2
+        nbdays = days.days
+    else : 
+        nbdays = "Pas de date d'arrivée"
+    responseData = {
+        'nbdays': nbdays,
+    }
+    return JsonResponse(responseData)
         
 class ResidentAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):

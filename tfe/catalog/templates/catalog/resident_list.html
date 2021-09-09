@@ -3,7 +3,24 @@
 {% load auth_extras %}
 {% block title %}Liste des produits{% endblock %}
 {% block content %}
+  {% if resident_list %}
+{% if action == "Add" %}
+<p>Etes-vous sur de vouloir rajouter les résidents suivants ?</p>
+  <form action="{% url 'add-import-data' %}" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input id="btnCreate" class="btn btn-dark" type="submit"> 
+</form>
+				{% elif action == "Delete" %}
+				<p>Etes-vous sur de vouloir supprimer les résidents suivants ? </p>
+				  <form action="{% url 'delete-import-data' %}" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <input id="btnCreate" class="btn btn-dark" type="submit"> 
+</form>
+				{% else %}
 <a id="btnCreate" class="btn btn-dark" href="{% url 'resident-create' %} ">+ Ajouter un résident</a>
+{% endif %}
+{% endif %}
+
   {% if resident_list %}
   	<table class="datatable table table-striped" id="ResidentTable" >
 		<thead>
@@ -15,8 +32,12 @@
 				<th scope="col">Chambre</th>
 				<th scope="col">Age</th>
 				<th scope="col">Sexe</th>
+				{% if action == "Add" %}
+				{% elif action == "Delete" %}
+				{% else %}
 				<th scope="col"></th>
 				<th scope="col"></th>
+				 {% endif %}
 			</tr>
 		</thead>
 		<tbody id="myTable">
@@ -30,8 +51,12 @@
 				<td>{{ resident.room }}</td>
 				<td>{{ resident.age }}</td>
 				<td>{{ resident.sexe }}</td>
+				{% if action == "Add" %}
+				{% elif action == "Delete" %}
+				{% else %}
 				<td></td>
 				<td ><a href=# onclick="getConfirmDeleteModal({{ resident.id }})" class="fa fa-pencil" ><img src="/static/media/icon/delete.png " alt="{{ resident.badge }}"></a></td>
+			  {% endif %}
 			</tr>
   {% endfor %}
   		</tbody>

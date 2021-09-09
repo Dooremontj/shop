@@ -1,0 +1,70 @@
+{% extends "index.html" %}
+{% load static %} 
+{% load auth_extras %}
+{% block title %}Liste des produits{% endblock %}
+{% block content %}
+
+
+  
+  <form action="{% url 'import' %}" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+<p id="error" class="errorform"></p>
+	<div class="form-group">
+    <label for="avatar">Choisissez un fichier XLSX:</label>
+
+<input type="file"
+       id="filexlsx" name="filexlsx"
+       accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/>
+	   <select id='AddOrRemove' name='AddOrRemove'  class="form-control form-control-lg">
+		<option value="Add" selected>Ajouter les résidents</option>
+		<option value="Delete">Supprimer les résidents</option>
+
+	</select>
+  </div>
+  <input id="btnCreate" class="btn btn-dark" type="submit"> 
+</form>
+  <div id="addModal"></div>
+{% endblock %}  
+{% block jscript %}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+
+<script>
+
+function getExtension(file) {
+  var parts = file.split('.');
+  return parts[parts.length - 1];
+}
+
+function isXLSX(file) {
+  var ext = getExtension(file);
+  switch (ext.toLowerCase()) {
+    case 'xlsx':
+      return true;
+  }
+  return false;
+}
+
+
+$(function() {
+  $('form').submit(function() {
+    function failValidation(msg) {
+      alert(msg); // just an alert for now but you can spice this up later
+      return false;
+    }
+
+    var file = $('#filexlsx');
+    if (!isXLSX(file.val())) {
+      return failValidation('Sélectionnez un fichier .XLSX');
+    }
+
+    // success at this point
+    // indicate success with alert for now
+    alert('Valid file! Here is where you would return true to allow the form to submit normally.');
+  });
+
+});
+
+</script>
+{% endblock %}
