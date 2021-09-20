@@ -62,6 +62,7 @@ urlpatterns = [
     path('supplier/create/', login_required(views.SupplierCreate), name='supplier-create'),
     path('supplier/<int:pk>', login_required(views.SupplierDetailView.as_view()), name='supplier-detail'),
     path('supplier/<int:pk>/delete/', login_required(views.SupplierDelete.as_view()), name='supplier-delete'),
+    path('supplier/<int:pk>/update/', login_required(views.SupplierUpdate), name='supplier-update'),
     path('Import/', login_required(views.Import), name='import'),
     path('Import/add', login_required(views.AddImport), name='add-import-data'),
     path('Import/delete', login_required(views.DeleteImport), name='delete-import-data'),

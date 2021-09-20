@@ -543,6 +543,24 @@ def SupplierCreate(request):
             'form': form,
     })
 
+def SupplierUpdate(request, pk):
+    obj= get_object_or_404(Supplier, id=pk)
+        
+    form = SupplierCreateForm(request.POST or None, instance= obj)
+    context= {'form': form}
+
+    if form.is_valid():
+        obj= form.save(commit= False)
+        obj.save()
+        messages.success(request, "You successfully updated the post")
+        context= {'form': form}
+        return HttpResponseRedirect(reverse('suppliers') )
+    else:
+        context= {'form': form,
+                           'error': 'The form was not updated successfully. Please enter in a title and content'}
+        # return HttpResponseRedirect(reverse('suppliers') )
+        return render(request, 'catalog/supplier_update_form.html', {'form': form}) 
+
 class SupplierDelete(DeleteView):
     model = Supplier
     success_url = reverse_lazy('suppliers')

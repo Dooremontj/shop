@@ -70,6 +70,16 @@ MAIN_CATEGORY = (
     ('PERSONNEL','PERSONNEL'),
 )
 
+
+SUB_CATEGORY = (
+    ('BUREAUTIQUE','BUREAUTIQUE'),
+    ('MOBILIER','MOBILIER'),
+    ('NOUVEAU-NEE','NOUVEAU-NEE'),
+    ('MATERIEL DESINFECTANT','MATERIEL DESINFECTANT'),
+    ('HYGIENE/NETTOYAGE','HYGIENE/NETTOYAGE'),
+    ('AUTRE','AUTRE'),
+)
+
 # Produit
 def content_file_name(instance, filename):
     ext = filename.split('.')[-1]
@@ -82,7 +92,7 @@ class Product(models.Model):
     prod_min = models.PositiveIntegerField(verbose_name="Quantité minimal", default='0')
     prod_max = models.PositiveIntegerField(verbose_name="Quantité maximal", default='1')
     prod_ref_in = models.CharField(max_length=100, verbose_name="Référence interne", 
-        blank=True, unique=True, error_messages={'unique':"La référence interne existe déja"})
+        blank=True)
     prod_supplier = models.ForeignKey('Supplier',verbose_name="Fournisseur", on_delete=models.SET_NULL, null=True)
     prod_ref_out = models.CharField(max_length=100, verbose_name="Référence externe", blank=True) 
     prod_date_create = models.DateTimeField(auto_now_add=True, verbose_name="Date d'ajout", blank=True)
@@ -96,6 +106,10 @@ class Product(models.Model):
     prod_main_category = models.CharField(max_length = 20,
 		choices = MAIN_CATEGORY,
 		default = 'PERSONNEL', verbose_name="Catégorie"
+		)
+    prod_sub_category = models.CharField(max_length = 50,
+		choices = SUB_CATEGORY,
+		default = 'AUTRE', verbose_name="Catégorie secondaire"
 		)
    
     class Meta:

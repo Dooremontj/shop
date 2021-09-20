@@ -1,0 +1,58 @@
+{% extends "index.html" %}
+{% load static %} 
+{% load auth_extras %}
+{% block title %}Liste des produits{% endblock %}
+{% block content %}
+
+
+   
+
+<a href=# onclick="RemoveOneToBasket()" class="btnaddandremove btn btn-danger"> - </a>
+				{% csrf_token %}
+				
+<p id="error" class="errorform"></p>
+	<div class="form-group">
+    <label for="commentary">Commentaire</label>
+    <textarea class="form-control" id="line" rows="5"></textarea>
+  </div>
+
+  <div id="addModal"></div>
+{% endblock %}  
+{% block jscript %}
+		<link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
+
+		<script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+
+<script>
+
+
+
+function RemoveOneToBasket() {
+var url ="{% url 'test' %}";
+var p = document.getElementById('line').value;
+	  $.ajax({
+		   type: "POST",
+		   url: url,
+		   data:
+				{
+					line:p,
+					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+				},
+		   success: function(data) {
+		   console.log(data);
+				if (!data['line'].length){
+					console.log(data);
+					$.each(data['line'], function(index, value) {
+						console.log(value)
+					});
+				} else {
+					$.each(data['line'], function(index, value) {
+						console.log(value)
+					});
+				}
+			}
+		 });
+}
+
+</script>
+{% endblock %}

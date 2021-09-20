@@ -1,0 +1,167 @@
+#ModalProducts_wrapper{
+  width: 100%;
+}
+
+
+#myTable td{
+	vertical-align: middle;
+	text-color : black;
+}
+
+#myTable td a{
+	color: black;
+    font-weight: bold;
+}
+
+#myTable td{
+	color: black;
+    font-weight: bold;
+}
+
+#myTable td.warning-stock{
+	color : red;
+    font-weight: bold;
+	border : 3px double crimson;
+	border-radius : 25%;
+
+}
+
+.orderdetail {
+	display : inline-block;
+	margin-bottom: 10px;
+}
+
+div.text{
+	display : inline-block;
+	vertical-align : middle;
+}
+
+.DetailOrderModal{
+	margin-left:20px;
+	margin-top:20px
+}
+
+.btnaddandremove{
+	display: inline-block;
+}
+.centeredText{
+	text-align : center;
+	margin : auto;
+}
+
+.errorlist {
+	color: red;
+    font-size: small;
+    display: inline;
+    list-style-type: none;
+}
+
+.errorform {
+	color: red;
+	font-size: small;
+    font-size: small;
+}
+.errorlist li {
+	color: red;
+    font-size: small;
+    display: inline;
+    list-style-type: none;
+}
+
+.delete-row{
+	color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+	display: inline-block;
+    font-weight: 400;
+	border: 1px solid transparent;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.add-row{
+	color: #fff;
+    background-color: #343a40;
+    border-color: #343a40;
+	display: inline-block;
+    font-weight: 400;
+	border: 1px solid transparent;
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: .25rem;
+    transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.select2 select2-container select2-container--default select2-container--below {
+	width : 90%;
+}
+
+#CartResident{
+		display : inline-block;
+}
+
+#btnCreate{
+		margin-bottom : 10px;
+}
+
+#myTable td a.btn-dark{
+	color : #fff;
+	font-weight: initial;
+}
+
+tbody#myTable tr td p{
+	display : inline-block;
+}
+
+p#error{
+		text-align:center;
+}
+
+hr.rounded {
+  border-top: 25px solid #bbb;
+  border-radius: 5px;
+}
+
+.panel-heading{
+	text-align: center;
+}
+
+input.form-control.qty{
+	width : 30%;
+	display : inline-block;
+}
+
+#FedOrdersTable_filter{
+	display:none;
+}#FedOrdersTableClosed_filter{
+	display:none;
+}
+
+input.form-control.check{
+    display: inline-block;
+    width: 5%;
+    vertical-align: middle;
+}
+
+div.vertical-center{
+	text-align: center;
+}
+
+.selectconso{
+	vertical-align : middle;
+    height: calc(1.5em + .75rem + 2px);
+    padding: .375rem .75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: .25rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}

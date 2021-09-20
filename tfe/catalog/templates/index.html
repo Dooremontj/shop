@@ -46,15 +46,7 @@
 					<li>
 						<a class="nav-link" href="{% url 'fed-orders' %}">Commandes du personnels</a>
 					</li>
-					<li>
-						<a class="nav-link" href="{% url 'product-shop' %}">Shop-Fedasil</a>
-					</li>
-					<li>
-						<a class="nav-link" href="{% url 'my-fed-orders' %}">Mes Commandes</a>
-					</li>
-					<li>
-						<a class="nav-link" href="{% url 'basket' %}">Mon Panier</a>
-					</li>
+
 					{% else %}
 					<li>
 						<a class="nav-link" href="{% url 'product-shop' %}">Shop</a>
@@ -66,7 +58,7 @@
 						<a class="nav-link" href="{% url 'basket' %}">Mon Panier</a>
 					</li>
 					{% endif %} 
-					<li><a class="nav-link" href="{% url 'logout'%}">Se déconnecter</a></li>
+					<li><a class="nav-link my-2 my-lg-0" href="{% url 'logout'%}">Se déconnecter</a></li>
 					
 				{% else %}
 					<li><a class="nav-link" href="{% url 'login'%}?next={{request.path}}">Se connecter</a></li>

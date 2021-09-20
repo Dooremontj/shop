@@ -14,6 +14,7 @@
 }
 
 #myTable td{
+	padding: 0 0 0 0;
 	color: black;
     font-weight: bold;
 }
@@ -23,6 +24,11 @@
     font-weight: bold;
 	border : 3px double crimson;
 	border-radius : 25%;
+
+}
+
+#myTable td.centercell{
+	text-align: center;
 
 }
 
@@ -99,6 +105,9 @@ div.text{
 .select2 select2-container select2-container--default select2-container--below {
 	width : 90%;
 }
+
+    
+
 
 #CartResident{
 		display : inline-block;

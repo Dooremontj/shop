@@ -50,7 +50,7 @@
 					{% if product.prod_stock > 0 %}
 					<input type="number" min="1" name="qty" id="qty{{product.id}}" value="1"></td>
 					<td><!-- <input class="btn btn-success" type="button" onclick="AddToBasket({{ product.id }})" value="+" /> -->
-						<a href="#" onclick="AddToBasket({{ product.id }},{{product.prod_stock}},{{product.prod_name}})" data-timeout="1500"  data-toggle="popover" role="button" class="btn btn-dark" title="Panier" data-content="Le produit : {{ product.prod_name }} a été ajouté au panier">+ Ajouter au panier</a>
+						<a onclick="AddToBasket({{ product.id }},{{product.prod_stock}})" data-timeout="1500"  data-toggle="popover" role="button" class="btn btn-dark" title="Panier" data-content="Le produit : {{ product.prod_name }} a été ajouté au panier">+ Ajouter au panier</a>
 					{% else %}
 					<input type="number" min="1" name="qty" id="qty{{product.id}}" value="1" disabled></td>
 						<td>
@@ -108,7 +108,7 @@ $("#selResident").change(function() {
 	var clickfun = document.getElementById("Resident_detail_order_function").getAttribute("onclick");
 	var getResidentOrderDetail = clickfun.substring(0,clickfun.indexOf("(")); 
 	document.getElementById("Resident_detail_order_function").setAttribute("onclick",getResidentOrderDetail+"("+name[0].value+")");
-	getDateIn(name[0].value)
+	getDateIn(name[0].value);
 }).change(); // trigger once if needed
 
 function getDateIn(pk){
@@ -117,7 +117,7 @@ var url ="{% url 'resident-date-in' 0 %}".replace('0', pk);
        type: "GET",
        url: url,
        success: function(data) {
-				  $("#nbdays").text(data['nbdays']);
+				  $("#nbdays").text(""+data['nbdays']);
        }
      });
 }
@@ -135,7 +135,8 @@ var url ="{% url 'product-detail' 0 %}".replace('0', pk);
 }
 
 function getBasketResidentDetail() {
-var user_basket = $(".resident").val();
+var user_basket = $("#selResident option:selected")[0].value;
+console.log($(".resident").val())
 var url ="{% url 'basket-resident-detail' 0 %}".replace('0', user_basket);
   $.ajax({
        type: "GET",
@@ -147,7 +148,7 @@ var url ="{% url 'basket-resident-detail' 0 %}".replace('0', user_basket);
      });
 }
 
-function AddToBasket(pk,stock,prod) {
+function AddToBasket(pk,stock) {
 var url ="{% url 'add-basket-resident' 0 %}".replace('0', pk);
 var qty_asked =$("#qty"+pk).val();
 	if (qty_asked == 0){
@@ -176,7 +177,7 @@ var qty_asked =$("#qty"+pk).val();
 				},
 		   success: function(data) {
 			   if (!data['error'].length){
-				   $('[data-toggle="popover"]').attr('data-content','Le produit : '+prod+' a été ajouté au panier');
+				   $('[data-toggle="popover"]').attr('data-content','Le produit a été ajouté au panier');
 				   $('[data-toggle="popover"]').attr('data-original-title','Panier');
 				   $('[data-toggle="popover"][data-timeout]').on('shown.bs.popover', function() {
 						this_popover = $(this);
@@ -246,7 +247,7 @@ $('.errors').remove();
 					text = p.textContent.replace( /^\D+/g, '');
 					number = Number(text);
 					var newrestant = number+point
-					$("#pointrestant").text('Points restant après commande : '+newrestant)
+					$("#pointrestant").text(newrestant)
 				} else {
 					p = document.getElementById('points'+pk);
 					text = p.textContent;
@@ -257,11 +258,11 @@ $('.errors').remove();
 					number = Number(text);
 					var newtotal = number-point
 					$("#totalpoints").text('Total de points de la commande : '+newtotal)
-					p = document.getElementById('pointrestant');
-					text = p.textContent.replace( /^\D+/g, '');
-					number = Number(text);
-					var newrestant = number+point
-					$("#pointrestant").text('Points restant après commande : '+newrestant)
+					p = document.getElementById('pointrestant').innerText;
+					//text = p.textContent.replace( /^\D+/g, '');
+					//number = Number(text);
+					var newrestant = parseFloat(p)+parseFloat(point)
+					$("#pointrestant").text(newrestant)
 				}
 			}
 		 });
@@ -279,36 +280,37 @@ $('.errors').remove();
 					csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
 				},
 		   success: function(data) {
-		   if (!data['error'].length){
-				var p = document.getElementById('qty_asked'+pk);
-				var text = p.textContent;
-				var number = Number(text);
-				$("#qty_asked"+pk).text(number+1)
-				p = document.getElementById('points'+pk);
-				text = p.textContent;
-				number = Number(text);
-				$("#points"+pk).text(number+point)
-				p = document.getElementById('totalpoints');
-				text = p.textContent.replace( /^\D+/g, '');
-				number = Number(text);
-				var newtotal = number+point
-				$("#totalpoints").text('Total de points de la commande : '+newtotal)
-				p = document.getElementById('pointrestant');
-				text = p.textContent.replace( /^\D+/g, '');
-				number = Number(text);
-				var newrestant = number-point
-				$("#pointrestant").text('Points restant après commande : '+newrestant)
-			}
-			else {
-				document.getElementById("error").innerHTML += "",
-				$('.errors').remove();
-				$.each(data['error'], function(index, value) {
-					var p = document.createElement("p");
-					p.className = "errors";
-					p.innerHTML += value;
-					document.getElementById("error").appendChild(p);
-				});
-			}
+			   if (!data['error'].length){
+					var p = document.getElementById('qty_asked'+pk);
+					var text = p.textContent;
+					var number = Number(text);
+					$("#qty_asked"+pk).text(number+1)
+					p = document.getElementById('points'+pk);
+					text = p.textContent;
+					number = Number(text);
+					$("#points"+pk).text(number+point)
+					p = document.getElementById('totalpoints');
+					text = p.textContent.replace( /^\D+/g, '');
+					number = Number(text);
+					var newtotal = number+point
+					$("#totalpoints").text('Total de points de la commande : '+newtotal)
+					p = document.getElementById('pointrestant').innerText;
+					//text = p.textContent.replace( /^\D+/g, '');
+					//number = Number(text);
+					console.log(p);
+					var newrestant = parseFloat(p)-parseFloat(point)
+					$("#pointrestant").text(newrestant)
+				}
+				else {
+					document.getElementById("error").innerHTML += "",
+					$('.errors').remove();
+					$.each(data['error'], function(index, value) {
+						var p = document.createElement("p");
+						p.className = "errors";
+						p.innerHTML += value;
+						document.getElementById("error").appendChild(p);
+					});
+				}
 				
 
 			}

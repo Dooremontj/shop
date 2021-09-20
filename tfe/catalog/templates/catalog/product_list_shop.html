@@ -10,8 +10,10 @@
 		<tr>
 			<th scope="col">Image</th>
 			<th scope="col">Produit</th>
+			<th scope="col">Catégorie</th>
 			<th scope="col">Stock</th>
 			<th scope="col">Quantité</th>
+			
 			<th scope="col"/></th>
 		</tr>
 	</thead>
@@ -25,6 +27,7 @@
 				<td scope="row" >
 					<a href=# onclick="getProductDetail({{ product.id }})" class="fa fa-pencil">{{ product.prod_name }}</a>
 				</td>
+				<td> {{ product.prod_sub_category }}</td>
 				<td>{{product.prod_stock}}</td>
 				<form action="{% url 'add-basket' product.id %}" method="post">
 				
@@ -32,8 +35,10 @@
 				 <input type="hidden" name="user_basket" class="resident" value=""/>
 					<td><input type="hidden" name="product" id="product{{product.id}}" value="{{ product.id }}">
 					<input type="hidden" name="product" id="productname{{product.id}}" value="{{ product.prod_name }}">
+					
 					{% if product.prod_stock > 0 %}
 					<input type="number" min="1" name="qty" id="qty{{product.id}}" value="1"></td>
+					
 					<td><!-- <input class="btn btn-success" type="button" onclick="AddToBasket({{ product.id }})" value="+" /> -->
 						<a  onclick="AddToBasket({{ product.id }},{{product.prod_stock}})" data-timeout="1500"  data-toggle="popover" role="button" class="btn btn-dark" title="Panier" data-content="Le produit : {{ product.prod_name }} a été ajouté au panier">+ Ajouter au panier</a>
 					{% else %}
@@ -60,16 +65,53 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.min.css">
 <script src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/rowgroup/1.1.3/js/dataTables.rowGroup.min.js"></script>
 
 <script>
 
 
+
 $(document).ready(function() {
-    $('#ShopList').DataTable({
-		"columnDefs": [
-			{ "targets": [0,2,3,4], "searchable": false }
-		]
-	});
+ var collapsedGroups = {};
+
+    var table = $('#ShopList').DataTable({
+	"pageLength": 100,
+	"columnDefs": [
+			{ "targets": [0,2,3,4], "searchable": false },
+			{
+                "targets": [ 2 ],
+                "visible": false,
+                "searchable": false
+            }
+		],
+      order: [[2, 'asc']],
+      rowGroup: {
+        // Uses the 'row group' plugin
+        dataSrc: 2,
+        startRender: function (rows, group) {
+            var collapsed = !!collapsedGroups[group];
+
+            rows.nodes().each(function (r) {
+                r.style.display = collapsed ? 'none' : '';
+            });    
+
+            // Add category name to the <tr>. NOTE: Hardcoded colspan
+            return $('<tr/>')
+                .append('<td colspan="8">' + group + ' (' + rows.count() + ')</td>')
+                .attr('data-name', group)
+                .toggleClass('collapsed', collapsed);
+        }
+      }
+    });
+
+   $('#ShopList tbody').on('click', 'tr.dtrg-start', function () {
+        var name = $(this).data('name');
+        collapsedGroups[name] = !collapsedGroups[name];
+        table.draw(false);
+    });  
+  
+
+
 	$('[data-toggle="popover"]').popover({
         placement: 'bottom',
         delay: {

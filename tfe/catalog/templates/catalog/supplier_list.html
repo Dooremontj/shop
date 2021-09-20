@@ -13,6 +13,7 @@
 				<th scope="col">Mail</th>
 				<th scope="col">Téléphone</th>
 				<th scope="col">Produits</th>
+				<th scope="col"></th>
 				<th scope="col">Supprimer</th>
 			</tr>
 		</thead>
@@ -24,6 +25,8 @@
 				<td><a href="mailto:{{ supplier.supplier_mail }}">{{ supplier.supplier_mail }}</a></td>
 				<td>{{ supplier.supplier_tel }}</td>
 				<td><a href=# onclick="getProductList({{ supplier.pk }})" class="fa fa-pencil"  ><img src="/static/media/icon/list.png " alt="{{ supplier.supplier_name }}"></a></td>
+			   <td class="td-img-action"><a href="{% url 'supplier-update' supplier.id %} "><img src="/static/media/icon/edit.png " alt="{{ supplier.supplier_name  }}"></a></td>
+
 				<td ><a href=# onclick="getConfirmDeleteModal({{ supplier.pk }})" class="fa fa-pencil" ><img src="/static/media/icon/delete.png " alt="{{ supplier.pk }}"></a></td>
 			</tr>
   {% endfor %}

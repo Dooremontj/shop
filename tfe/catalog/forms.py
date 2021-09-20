@@ -52,10 +52,12 @@ class ProductCreateForm(forms.ModelForm):
             errors['prod_min']= _('La quantité minimale ne peut pas être supérieur ou égale à la quantité maximale')
         if self.cleaned_data['prod_max'] is None:
             errors['prod_max'] = _('La quantité maximale ne peut pas être nulle')
-        if Product.objects.filter(prod_supplier=self.cleaned_data['prod_supplier'], prod_ref_out = self.cleaned_data['prod_ref_out']).count() ==1 :
-            errors['prod_ref_out'] = _('La référence externe existe déja pour ce fournisseur')
-        if Product.objects.filter(prod_ref_in=self.cleaned_data['prod_ref_in']).count() == 1:
-            errors['prod_ref_in'] = _('La référence interne existe déja')
+        if self.cleaned_data['prod_ref_out'] != "" :
+            if Product.objects.filter(prod_supplier=self.cleaned_data['prod_supplier'], prod_ref_out = self.cleaned_data['prod_ref_out']).count() ==1 :
+                errors['prod_ref_out'] = _('La référence externe existe déja pour ce fournisseur')
+        if self.cleaned_data['prod_ref_in'] != "":
+            if Product.objects.filter(prod_ref_in=self.cleaned_data['prod_ref_in']).count() == 1:
+                errors['prod_ref_in'] = _('La référence interne existe déja')
         if errors:
             raise ValidationError(errors)
         return self.cleaned_data
@@ -71,17 +73,17 @@ class SupplierCreateForm(forms.ModelForm):
         for visible in self.visible_fields():
             visible.field.widget.attrs['class'] = 'form-control'
             
-    def clean(self):
-        errors={}
-        if Supplier.objects.filter(supplier_name = self.cleaned_data['supplier_name']).count() == 1:
-            errors['supplier_name']= _('Le fournisseur existe déja')
-        if Supplier.objects.filter(supplier_mail = self.cleaned_data['supplier_mail']).count() == 1:
-            errors['supplier_mail']= _('L adresse mail existe déja')
-        if Supplier.objects.filter(supplier_tel = self.cleaned_data['supplier_tel']).count() == 1:
-            errors['supplier_tel']= _('Le numéro de téléphone existe déja')
-        if errors:
-            raise ValidationError(errors)
-        return self.cleaned_data
+    # def clean(self):
+        # errors={}
+        # if Supplier.objects.filter(supplier_name = self.cleaned_data['supplier_name']).count() == 1:
+            # errors['supplier_name']= _('Le fournisseur existe déja')
+        # if Supplier.objects.filter(supplier_mail = self.cleaned_data['supplier_mail']).count() == 1:
+            # errors['supplier_mail']= _('L adresse mail existe déja')
+        # if Supplier.objects.filter(supplier_tel = self.cleaned_data['supplier_tel']).count() == 1:
+            # errors['supplier_tel']= _('Le numéro de téléphone existe déja')
+        # if errors:
+            # raise ValidationError(errors)
+        # return self.cleaned_data
         
 class ResidentCreateForm(forms.ModelForm):
             

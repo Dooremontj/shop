@@ -34,28 +34,28 @@
 					<a href=# onclick="getProductDetail({{ product.product.id }})" class="fa fa-pencil">{{ product.product.prod_name }}</a>
 					<p {% if product.error == null %} hidden {% endif %} class="errorform"> {{ product.error }} </p>
 				</td>
-				<td scope="row" >
+				<td class="centercell " scope="row" >
 					{{ product.product.prod_limit }}
 				</td>
-				<td>
+				<td class="centercell ">
 				<!--<form class="btnaddandremove" action="{% url 'basketresident-remove-one' product.id %}" method="post">-->
-				<a href=# onclick="RemoveOneToBasket({{ product.id }}, {{product.qty}}, {{ product.points }},{{ product.product.prod_limit }}, {{ points }})" class="btnaddandremove btn btn-danger"> - </a>
+				<a onclick="RemoveOneToBasket({{ product.id }}, {{product.qty}}, {{ product.points }},{{ product.product.prod_limit }}, {{ points }})" class="btnaddandremove btn btn-danger"> - </a>
 				{% csrf_token %}
 				<!-- <input class="btn btn-danger" type="submit" value="-" /> 
 				</form> -->
 				<p name="qty_asked" id="qty_asked{{product.id}}">{{ product.qty }}</p>
 				<!--<form class="btnaddandremove" action="{% url 'basketresident-add-one' product.id %}" method="post">{% csrf_token %}<input class="btn btn-success" type="submit" value="+" />
 				</form>-->
-				<a href=# onclick="AddOneToBasket({{ product.id }}, {{product.qty}}, {{ product.points }},{{ product.product.prod_limit }}, {{ points }})" class="btnaddandremove btn btn-success"> + </a>
+				<a onclick="AddOneToBasket({{ product.id }}, {{product.qty}}, {{ product.points }},{{ product.product.prod_limit }}, {{ points }})" class="btnaddandremove btn btn-success"> + </a>
 				</td>
-				<td> <p name="points" id="points{{product.id}}">{{ product.points }}</p> </td>
+				<td class="centercell "> <p name="points" id="points{{product.id}}">{{ product.points }}</p> </td>
 		</tr>
   {% endfor %}
 	</tbody>
 </table>
 <p name="totalpoints" id="totalpoints" > Total de points de la commande : {{ points }} </p>
 <p> Points par semaine : {{ user_points }} </p>
-<p id="pointrestant"> Points restant après commande : {{ ptwithorder }} </p>
+<span><span> Points restant après commande :</span><span id="pointrestant"> {{ ptwithorder }} </span></span>
 <div class="input-group mb-3">
   <div class="input-group-prepend">
     <div class="input-group-text">
